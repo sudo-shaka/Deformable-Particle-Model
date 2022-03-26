@@ -29,6 +29,8 @@ void init_Cell(py::module &m){
     .def_readwrite("r0",&DPM::Cell::r0)
     .def_readwrite("X",&DPM::Cell::X)
     .def_readwrite("Y",&DPM::Cell::Y)
+    .def_readwrite("Fx",&DPM::Cell::Fx)
+    .def_readwrite("Fy",&DPM::Cell::Fy)
     .def("PerimeterForceUpdate",&DPM::Cell::PerimeterForceUpdate)
     .def("AreaForceUpdate", &DPM::Cell::AreaForceUpdate)
     .def("BendingForceUpdate",&DPM::Cell::BendingForceUpdate)

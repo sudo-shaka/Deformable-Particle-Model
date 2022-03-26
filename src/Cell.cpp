@@ -35,8 +35,8 @@ namespace DPM{
             im1[i] = i-1;
             ip1[i] = i+1;
         }
-        im1[NV] = 0; 
-        ip1[0] = NV-1;  
+        im1[0] = NV-1; 
+        ip1[NV-1] = 0;  
     }
 
     void Cell::PerimeterForceUpdate(){
@@ -45,13 +45,15 @@ namespace DPM{
         for(i = 0;i<NV;i++){
             lvx[i] = X[ip1[i]] - X[i];
             lvy[i] = Y[ip1[i]] - Y[i];
+        }
+        for(i=0;i<NV;i++){
             length[i] = sqrt(lvx[i]*lvx[i] + lvy[i] * lvy[i]);   
         }
         for(i=0;i<NV;i++){
             ulvx[i] = lvx[i]/length[i];
             ulvy[i] = lvy[i]/length[i];
-            dli[i] = length[i]/l0 - 1;
-            dlim1[i] = length[im1[i]]/l0 - 1;
+            dli[i] = (length[i]/l0) - 1;
+            dlim1[i] = (length[im1[i]]/l0) - 1;
         }
         for(i=0;i<NV;i++){
             Fx[i] += (Kl*((sqrt(a0))/l0))*(dli[i]*ulvx[i] - dlim1[i]*ulvx[im1[i]]);
