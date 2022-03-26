@@ -10,6 +10,8 @@ except:
   print('This demo required matplotlib pyplot to be installed. \nPlease install with "pip install matplotlib"')
   exit(1)
 
+
+print("This is an example of a single deformable particle crawling around")
 C = Cell(1,0,0,1.17,50,1.0,0.1,1.0,0.1,0.1,0.2,1.0,0.0);
 
 for i in range(1000000):
