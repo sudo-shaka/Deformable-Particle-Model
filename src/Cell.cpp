@@ -9,8 +9,8 @@ namespace DPM{
         calA0 = CalA01*(NV*tan(M_PI/NV)/M_PI);
 
         a0 = a01;
-        l0 = 2.0*sqrt(M_PI*calA0*a0)/NV;
         r0 = sqrt((2.0*a0)/(NV*sin((2.0*M_PI)/NV)));
+        l0 = 2.0*sqrt(M_PI*calA0*a0)/NV;
     
         Kl = Kl1;
         Kb = Kb1;
@@ -71,19 +71,23 @@ namespace DPM{
     }
 
     void Cell::BendingForceUpdate(){
+        double rho0 = sqrt(a0);
+        double fb = Kb*(rho0/(l0*l0));
         double lvx[NV], lvy[NV], six[NV], siy[NV];
         int i=0;
         for(i=0;i<NV;i++){
             lvx[i] = X[ip1[i]] - X[i];
             lvy[i] = Y[ip1[i]] - Y[i];
         }
+
         for(i=0;i<NV;i++){
             six[i] = lvx[i] - lvx[im1[i]];
             siy[i] = lvy[i] - lvy[im1[i]];
         }
+
         for(i=0;i<NV;i++){
-            Fx[i] += (Kb*((sqrt(a0))/(l0*l0)))*(2.0*six[i] - six[im1[i]] - six[ip1[i]]);
-            Fy[i] += (Kb*((sqrt(a0))/(l0*l0)))*(2.0*siy[i] - siy[im1[i]] - siy[ip1[i]]);
+            Fx[i] += 0.1*fb*(2.0*six[i] - six[im1[i]] - six[ip1[i]]);
+            Fy[i] += 0.1*fb*(2.0*siy[i] - siy[im1[i]] - siy[ip1[i]]);
         }
     }
 
@@ -135,46 +139,30 @@ namespace DPM{
         psi += sqrt(2.0*dt*Dr)*grv;
     }
 
-    void Cell::UpdateDirectorPsi(double newpsi){
-        psi = newpsi;
-    }
-
     void Cell::UpdateStickness(int vertex, double newl1, double newl2){
         l1[vertex] = newl1;
         l2[vertex] = newl2;
     }
 
     double Cell::GetPerim(){
-        double perimeter = 0.0;
-        double dx, dy, lengthi; 
-
-        for(int i=0;i<NV;i++){
-            if(i == NV){
-                dx = abs(X[NV] - X[0]);
-                dy = abs(Y[NV] - Y[0]);
-                lengthi = sqrt(dx*dx + dy*dy);
-            }
-            else{
-                dx = abs(X[i] - X[i+1]);
-                dy = abs(Y[i] - Y[i+1]);
-                lengthi = sqrt(dx*dx + dy*dy);
-            }
-            perimeter += lengthi; 
+        double perimeter=0.0;
+        double dx, dy; int i;
+        for(i=0;i<NV;i++){
+            dx = abs(X[im1[i]]-X[i]);
+            dy = abs(Y[im1[i]]-Y[i]);
+            perimeter += sqrt(dx*dx + dy*dy);
         }
         return perimeter;
     }
 
     double Cell::GetArea(){
-        double leftSum = 0.0;
-	    double rightSum = 0.0;
- 
-	    for (int i = 0; i < NV; ++i) {
-	    	int j = (i + 1) % NV;
-	    	leftSum  += X[i] * Y[j];
-	    	rightSum += X[j] * Y[i];
+	    double Area = 0.0;
+        int j = NV-1;
+	    for (int i = 0; i < NV; i++) {
+	    	Area += 0.5 * ((X[j] + X[i]) * (Y[j] - Y[i]));
+            j = i;
         }
-
-        return 0.5 * abs(leftSum-rightSum);
+        return abs(Area);
     }
 
     double Cell::GetShapeParam(){
