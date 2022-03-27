@@ -14,6 +14,7 @@ namespace DPM{
             double Kc;
             double Ftol;
             double dt0;
+            double U;
             std::vector<DPM::Cell> Cells;
             std::vector<bool> overlaps;
             //functions
@@ -23,8 +24,7 @@ namespace DPM{
             double GetPackingFraction();
             double GetVertexKineticEnergy();
             void FindOverlaps(int ci, int cj);
-            void RepulsiveForceUpdate();
-            void AttractiveForceUpdate();
+            void InteractingForceUpdate();
             void ResetForces();
     };
 }
