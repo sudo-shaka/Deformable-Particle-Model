@@ -87,7 +87,7 @@ namespace DPM{
                 Cells[i].Y[j] = Cells[i].r0*(sin(2.0*M_PI*(j+1)/Cells[i].NV)) + Y[i];
             }
         }
-        Ftol = U/10;
+        Ftol = U/100;
     }
     void monolayer::VertexFIRE(){
         int ci,vi,i,NDELAY = 20, itmax = 5e4;
@@ -202,10 +202,11 @@ namespace DPM{
             for(ci=0;ci<NCELLS;ci++){
                 for(vi=0;vi<Cells[ci].NV;vi++){
                     Cells[ci].UpdateShapeForces();
-                    RepulsiveForceUpdate();
-                    AttractiveForceUpdate();
                 }
             }
+
+            RepulsiveForceUpdate();
+            AttractiveForceUpdate();
 
             for(ci=0;ci<NCELLS;ci++){
                 for(vi=0;vi<Cells[ci].NV;vi++){  
@@ -229,7 +230,12 @@ namespace DPM{
             cerr << "(!) Fire Minimization did not converge" << endl;
         }
         else{
-            cout << "FIRE Minimization Converged!" << endl;
+            cout << "FIRE Minimization Converged in "<< fireit << " timesteps" << endl;
+            cout << "	 iterations = " << fireit << endl;
+            cout << "	 fcheck = " << fcheck << endl;
+            cout << "	 dt = " << dt << endl;
+            cout << "	 P = " << P << endl;
+            cout << "	 alpha = " << alpha << endl;
         }
 
     }
