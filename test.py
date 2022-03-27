@@ -12,11 +12,12 @@ except:
 
 
 print("This is an example of a single deformable particle crawling around")
-C = Cell(1,0,0,1.17,50,1.0,0.05,1.0,0.1,0.1,0.2,1.0,0.0);
+#input order: index, centerX1,centerY1, CalA0, vertexNumber, Kl, Kb, Ka, velocity0, Dr1, Ds2, area0, director (psi)
+C = Cell(1,0,0,1.17,40,1.0,0.05,1.0,0.1,0.1,0.1,1.0,0.0);
 
 for i in range(1000000):
-  C.UpdateDirectorDiffusion(0.005)
-  C.UpdateEuler(0.005)
+  C.UpdateDirectorDiffusion(0.001)
+  C.UpdateEuler(0.001)
   if i % 100000 == 0:
     plt.scatter(C.X,C.Y);
 
