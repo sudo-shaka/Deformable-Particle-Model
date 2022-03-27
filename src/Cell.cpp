@@ -3,7 +3,7 @@
 #include <vector>
 
 namespace DPM{
-    Cell::Cell(int idx1, double x1, double y1, double CalA01, int NV1, double Ka1, double Kl1, double Kb1, double v01, double Dr1, double Ds1, double a01, double psi1){
+    Cell::Cell(int idx1, double x1, double y1, double CalA01, int NV1, double Kl1, double Kb1, double Ka1, double v01, double Dr1, double Ds1, double a01, double psi1){
         idx = idx1;
         NV = NV1;
         calA0 = CalA01*(NV*tan(M_PI/NV)/M_PI);
