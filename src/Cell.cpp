@@ -148,8 +148,8 @@ namespace DPM{
         double perimeter=0.0;
         double dx, dy; int i;
         for(i=0;i<NV;i++){
-            dx = abs(X[im1[i]]-X[i]);
-            dy = abs(Y[im1[i]]-Y[i]);
+            dx = abs(X[ip1[i]]-X[i]);
+            dy = abs(Y[ip1[i]]-Y[i]);
             perimeter += sqrt(dx*dx + dy*dy);
         }
         return perimeter;
@@ -166,8 +166,8 @@ namespace DPM{
     }
 
     double Cell::GetShapeParam(){
-        double perim = Cell::GetPerim();
-        double area = Cell::GetArea();
+        double perim = GetPerim();
+        double area = GetArea();
         return (perim*perim)/(area*M_PI*4);
     }
 
