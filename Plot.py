@@ -1,7 +1,7 @@
 import DPM
 from matplotlib import pyplot as plt
 
-
+#Simple script to rebox the periodic boundary conditions and then plot using matplotlib
 def PlotDPM(monolayer):
     L = monolayer.BoxLength;
     for ci in range(monolayer.NCELLS):
