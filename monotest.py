@@ -12,8 +12,9 @@ def Euler():
   C = DPM.Cell(1,0,0,1.4,32,1.0,0.5,0.1,0.05,0.2,0.1,20.0,0)
 
   ncells = 7;
+  packingfraction = 0.85
   #initialize a monolayer if n number cells and a packing fraction of 
-  mono = DPM.monolayer([C]*ncells,0.85);
+  mono = DPM.monolayer([C]*ncells,packingfraction);
   #Disperse the monolayer using simple hard sphere repulsions
   mono.disperse();
   count = 0;
