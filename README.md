@@ -7,4 +7,4 @@ To use the model in python type:
 
 import DPM
 
-![out](https://user-images.githubusercontent.com/68864205/160262958-6ee9c75f-960f-4274-b7c2-767fafef6712.gif)
+![out](https://user-images.githubusercontent.com/68864205/160470536-aed6a030-68e9-4d0b-bd31-fffa5d9aff55.gif)
