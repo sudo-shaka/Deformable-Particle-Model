@@ -22,12 +22,13 @@ def Euler():
   mono.Kc = 0.5;
   
   #begining time steps
+  dt = 0.001
   for i in progressbar(range(int(20000))):
     #for every cell change the direction its going
     for ci in range(ncells):
-      mono.Cells[ci].UpdateDirectorDiffusion(0.001)
+      mono.Cells[ci].UpdateDirectorDiffusion(dt)
     #update the positions with a dt of 0.001
-    mono.UpdateEuler(0.001);
+    mono.UpdateEuler(dt);
     #plot every 1000 time steps
     if i % 1000 == 0:
       PlotDPM(mono)
