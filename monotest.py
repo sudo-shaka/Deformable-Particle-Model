@@ -3,6 +3,7 @@ try:
   from matplotlib import pyplot as plt
   from progressbar import progressbar
   import imageio
+  from Plot import PlotDPM
 except:
   print("You do not have the required dependencies to run this simulation");
 
@@ -28,9 +29,8 @@ def Euler():
     mono.UpdateEuler(0.001);
     #plot every 1000 time steps
     if i % 1000 == 0:
-      for ci in range(ncells):
-        plt.scatter(mono.Cells[ci].X,mono.Cells[ci].Y)
-      plt.axis('equal');
+      PlotDPM(mono)
+      plt.axis('equal')
       plt.savefig('/tmp/'+str(count)+'.png')
       plt.clf();
       count +=1;
