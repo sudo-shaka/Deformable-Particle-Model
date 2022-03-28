@@ -20,8 +20,11 @@ void init_Cell(py::module &m){
     py::arg("Ds"),
     py::arg("a0"),
     py::arg("psi")
-    )   
+    )
+    .def(py::init<int>(),py::arg("NV"))
     .def_readwrite("v0",&DPM::Cell::v0)
+    .def_readwrite("Ds",&DPM::Cell::Dr)
+    .def_readwrite("Dr",&DPM::Cell::Ds)
     .def_readwrite("Kl",&DPM::Cell::Kl)
     .def_readwrite("Kb",&DPM::Cell::Kb)
     .def_readwrite("Ka",&DPM::Cell::Ka)
@@ -35,6 +38,7 @@ void init_Cell(py::module &m){
     .def_readwrite("l1",&DPM::Cell::l1)
     .def_readwrite("l2",&DPM::Cell::l2)
     .def_readonly("psi",&DPM::Cell::psi)
+    .def("ResetForces",&DPM::Cell::ResetForces)
     .def("PerimeterForceUpdate",&DPM::Cell::PerimeterForceUpdate)
     .def("AreaForceUpdate", &DPM::Cell::AreaForceUpdate)
     .def("BendingForceUpdate",&DPM::Cell::BendingForceUpdate)

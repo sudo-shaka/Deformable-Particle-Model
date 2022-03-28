@@ -20,7 +20,7 @@ namespace DPM{
         L = sqrt(sumareas)/phi0;
         Kc = 1.0;
         Ftol = 1e-2;
-        dt0 = 0.005;
+        dt0 = 0.001;
         U = 0.0;
     }
 
@@ -36,7 +36,7 @@ namespace DPM{
             Y[i] = drand48() * L;
         }
         double oldU = 100, dU = 100;
-        while(abs(dU) > 0.0001){
+        while(abs(dU) > 1e-6){
             U = 0;
             for(i=0;i<NCELLS;i++){
                 Fx[i] = 0.0;
@@ -104,7 +104,7 @@ namespace DPM{
         alpha = alpha0;
 
         dtmax = 10.0 * dt;
-        dtmin = 1e-3 * dt;
+        dtmin = 1e-2 * dt;
         double finc = 1.01;
         double fdec = 0.99;
         double falpha = 0.99;
@@ -124,9 +124,10 @@ namespace DPM{
             for(i=0;i<NCELLS;i++){
                 for(vi=0;vi<Cells[i].NV;i++){
                     P+= sqrt(Cells[i].vx[vi]*Cells[i].vy[vi]) + sqrt(Cells[i].Fx[vi]*Cells[i].Fy[vi]);
-    
                 }
             }
+
+            cout << P << endl;
 
             if(P>0){
                 npPos++;
@@ -209,7 +210,7 @@ namespace DPM{
             InteractingForceUpdate();
 
             for(ci=0;ci<NCELLS;ci++){
-                for(vi=0;vi<Cells[ci].NV;vi++){  
+                for(vi=0;vi<Cells[ci].NV;vi++){
                      Cells[ci].vx[vi] += 0.5 * dt * Cells[ci].Fx[vi];
                      Cells[ci].vy[vi] += 0.5 * dt * Cells[ci].Fy[vi];
                 }
@@ -222,9 +223,7 @@ namespace DPM{
                 }
             }
             fcheck = sqrt(fcheck)/VertDOF;
-
             fireit++;
-
         }
         if(fireit == itmax){
             cerr << "(!) Fire Minimization did not converge" << endl;
@@ -240,7 +239,7 @@ namespace DPM{
 
     }
     void monolayer::UpdateEuler(double dt){
-    
+
         ResetForces();
         //For all the cell,s update the forces based on intracellular shapes
         for(int ci=0;ci<NCELLS;ci++){
@@ -298,7 +297,7 @@ namespace DPM{
             for(vi=0;vi<NVi;vi++){
                 nNeg = 0; nPos = 0;
                 y = Cells[ci].Y[vi];
-                x = Cells[ci].X[vi]; 
+                x = Cells[ci].X[vi];
                 for(vj=0;vj<NVj;vj++){
                     //D = (x2 - x1) * (yp - y1) - (xp - x1) * (y2 - y1)
                     test = (X[Cells[cj].ip1[vj]] - X[vj]) * (y - Y[vj]) - (x - X[vj]) * (Y[Cells[cj].ip1[vj]] - Y[vj]);
@@ -306,24 +305,22 @@ namespace DPM{
                         nNeg++;
                     else
                         nPos++;
-                    
                 }
                 if(nNeg == 0 || nPos == 0)
                     overlaps[vi] = true;
                 else
                     overlaps[vi] = false;
             }
- 
         }
         else{
             //use crossing test: If you draw a line out from point, does it cross an odd number of times?
             int i, j;
             for(vi=0;vi<NVi;vi++){
                 bool inside = false;
-                y = Cells[ci].Y[vi]; 
-                x = Cells[ci].X[vi]; 
+                y = Cells[ci].Y[vi];
+                x = Cells[ci].X[vi];
                 for (i = 0, j = NVj-1; i < NVj; j = i++) {
-                    if ( ((Y[i]>y) != (Y[j]>y)) && 
+                    if ( ((Y[i]>y) != (Y[j]>y)) &&
                     (x < (X[j]-X[i]) * (y-Y[i]) / (Y[j]-Y[i]) + X[i]) )
                     {
                         inside = !inside;
@@ -332,7 +329,6 @@ namespace DPM{
                 overlaps[vi] = inside;
             }
         }
-        
     }
     void monolayer::InteractingForceUpdate(){
         int ci,cj,vi,vj;
@@ -341,53 +337,57 @@ namespace DPM{
         for(ci=0;ci<NCELLS;ci++){
             cxi = Cells[ci].GetCenterX();
             cyi = Cells[ci].GetCenterY();
+            Cells[ci].FindRadii();
             for(cj=0;cj<NCELLS;cj++){
                 if(ci!=cj){
                     FindOverlaps(ci,cj);
+                    Cells[cj].FindRadii();
                     cxj = Cells[cj].GetCenterX();
                     cyj = Cells[cj].GetCenterY();
                     dx = cxj-cxi;
                     dx -= L*round(dx/L);
                     dy  = cyj-cyi;
-                    dy -= L*round(dx/L);
+                    dy -= L*round(dy/L);
                     rij = sqrt(dx*dx + dy*dy);
-                    sij = Cells[cj].r0 + Cells[ci].r0;
                     for(vi=0;vi<Cells[ci].NV;vi++){
-                        shellij = (1.0+Cells[vi].l2[vi])*sij;
-                        cutij = (1.0 + Cells[vi].l1[vi])*sij;
                         for(vj=0;vj<Cells[cj].NV;vj++){
+                            sij = Cells[ci].radii[vi] + Cells[cj].radii[vj];
+                            xij = (rij/sij)/L;
                             ftmp = 0.0;
-                            xij = rij/sij;
                             if(overlaps[vi]){
                                 //if overlapping repell the particles away from eachothers centers
-                                ftmp = Kc * (1-xij)/(sqrt(Cells[ci].a0)/sij);
+                                ftmp = Kc * (1-xij)/abs(sqrt(Cells[ci].a0)/sij);
+                                U += 0.5*Kc * pow(1-sij/rij,2);
                             }
-                            else if((rij > cutij) && (rij < shellij && Cells[ci].l1[vi] != 0 && Cells[ci].l2[vi] != 0)){
+                            else{
+                                shellij = (1.0+Cells[ci].l2[vi])*sij;
+                                cutij = (1.0+Cells[ci].l1[vi])*sij;
                                 //if not overlapping, see if they are within attractive distance
-                                
-                                kint = (Kc*Cells[ci].l1[vi])/(Cells[ci].l2[vi]-Cells[ci].l1[vi]);
-                                //ftmp = 1.0*(xij - 1.0 - Cells[ci].l2[vi])/sij;
-                                //ftmp = 0.0;
+                                if(rij >= cutij && rij <= shellij){
+                                    kint = (Kc*Cells[ci].l1[vi])/(Cells[ci].l2[vi]-Cells[ci].l1[vi]);
+                                    ftmp = kint * (xij - (1.0 - Cells[ci].l2[vi]))/sij;
+                                    //ftmp = 0.0;
+                                }
                             }
                             //force update
                             Cells[ci].Fx[vi] -= ftmp * (dx/rij);
                             Cells[ci].Fy[vi] -= ftmp * (dy/rij);
                             Cells[cj].Fx[vj] += ftmp * (dx/rij);
-                            Cells[cj].Fy[vj] += ftmp * (dx/rij);
+                            Cells[cj].Fy[vj] += ftmp * (dy/rij);
                         }
                     }
-                } 
+                }
             }
         }
     }
     void monolayer::ResetForces(){
+        U = 0;
         for(int ci=0;ci<NCELLS;ci++){
             for(int vi=0;vi<Cells[ci].NV;vi++){
                 Cells[ci].Fx[vi] = 0.0;
                 Cells[ci].Fy[vi] = 0.0;
                 Cells[ci].vx[vi] = 0.0;
                 Cells[ci].vy[vi] = 0.0;
-
             }
         }
     }

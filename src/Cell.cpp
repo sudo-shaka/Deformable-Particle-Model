@@ -3,6 +3,7 @@
 #include <vector>
 
 namespace DPM{
+    //constructors
     Cell::Cell(int idx1, double x1, double y1, double CalA01, int NV1, double Kl1, double Kb1, double Ka1, double v01, double Dr1, double Ds1, double a01, double psi1){
         idx = idx1;
         NV = NV1;
@@ -11,7 +12,7 @@ namespace DPM{
         a0 = a01;
         r0 = sqrt((2.0*a0)/(NV*sin((2.0*M_PI)/NV)));
         l0 = 2.0*sqrt(M_PI*calA0*a0)/NV;
-    
+
         Kl = Kl1;
         Kb = Kb1;
         Ka = Ka1;
@@ -23,7 +24,7 @@ namespace DPM{
 
         X.resize(NV); Y.resize(NV); l1.resize(NV); l2.resize(NV);
         Fx.resize(NV); Fy.resize(NV); vx.resize(NV); vy.resize(NV);
-        im1.resize(NV); ip1.resize(NV);
+        im1.resize(NV); ip1.resize(NV); radii.resize(NV);
 
         for(int i=0; i<NV; i++){
             X[i] = r0*(cos(2.0*M_PI*(i+1)/NV)) + x1;
@@ -34,9 +35,57 @@ namespace DPM{
             vy[i] = 0.0;
             im1[i] = i-1;
             ip1[i] = i+1;
+            radii[i] = r0;
         }
-        im1[0] = NV-1; 
-        ip1[NV-1] = 0;  
+        im1[0] = NV-1;
+        ip1[NV-1] = 0;
+    }
+
+    Cell::Cell(int NVi){
+        idx =0;
+        NV = NVi;
+        a0 = (NV/20);
+        r0 = sqrt((2.0*a0)/(NV*sin((2.0*M_PI)/NV)));
+        l0 = 2.0*sqrt(M_PI*calA0*a0)/NV;
+
+        if(NV < 3){
+            exit(1);
+        }
+
+        X.resize(NV); Y.resize(NV); l1.resize(NV); l2.resize(NV);
+        Fx.resize(NV); Fy.resize(NV); vx.resize(NV); vy.resize(NV);
+        im1.resize(NV); ip1.resize(NV); radii.resize(NV);
+
+        for(int i=0; i<NV;i++){
+            X[i] = r0*(cos(2.0*M_PI*(i+1)/NV));
+            Y[i] = r0*(sin(2.0*M_PI*(i+1)/NV));
+            l1[i] = 0.0;
+            l2[i] = 0.0;
+            vx[i] = 0.0;
+            vy[i] = 0.0;
+            im1[i] = i-1;
+            ip1[i] = i+1;
+            radii[i] = r0;
+        }
+        im1[0] = NV-1;
+        ip1[NV-1] = 0;
+        v0 = 0;
+        vmin = 0;
+        Ka = 0.0;
+        Kb = 0.0;
+        Kl = 0.0;
+        psi = 0.0;
+        Dr = 0.0;
+        Ds = 0.0;
+    }
+
+    void Cell::ResetForces(){
+        for(int i =0; i<NV;i++){
+            Fx[i] = 0.0;
+            Fy[i] = 0.0;
+            vx[i] = 0.0;
+            vy[i] = 0.0;
+        }
     }
 
     void Cell::PerimeterForceUpdate(){
@@ -47,7 +96,7 @@ namespace DPM{
             lvy[i] = Y[ip1[i]] - Y[i];
         }
         for(i=0;i<NV;i++){
-            length[i] = sqrt(lvx[i]*lvx[i] + lvy[i] * lvy[i]);   
+            length[i] = sqrt(lvx[i]*lvx[i] + lvy[i] * lvy[i]);
         }
         for(i=0;i<NV;i++){
             ulvx[i] = lvx[i]/length[i];
@@ -188,6 +237,19 @@ namespace DPM{
         return CenterY/NV;
 
     }
+
+    void Cell::FindRadii(){
+        double cx = GetCenterX();
+        double cy = GetCenterY();
+        double dx,dy;
+
+        for(int i=0;i<NV;i++){
+            dx = X[i] - cx;
+            dy = Y[i] - cy;
+            radii[i] = abs(sqrt(dx*dx + dy*dy));
+        }
+    }
+
     bool Cell::isConvex(){
         bool neg = false;
         bool pos = false;
@@ -199,7 +261,7 @@ namespace DPM{
             double BAy = Y[a] - Y[b];
             double BCx = X[c] - X[b];
             double BCy = Y[c] - Y[b];
-            double crossProduct = (BAx * BCy - BAy * BCx); 
+            double crossProduct = (BAx * BCy - BAy * BCx);
             if(crossProduct < 0) neg = true;
             else if(crossProduct > 0) pos = true;
             if(neg && pos) return false;
