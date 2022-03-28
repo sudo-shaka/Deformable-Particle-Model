@@ -17,6 +17,7 @@ A. Boromand, A. Signoriello, F. Ye, C. S. O'Hern, and M. D. Shattuck, "Jamming o
 Requirements:
 python3:
   - pybind11 : Get via "pip3 install pybind11"
+  - setuptools : Get via "pip3 install setuptools" or "sudo apt install python3-setuptools"
 
 C++ compilers:
   - build-essential : Get via "sudo apt install build-essential"
