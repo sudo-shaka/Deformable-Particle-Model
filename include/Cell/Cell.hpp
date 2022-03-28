@@ -27,6 +27,7 @@ namespace DPM {
             double psi;
             std::vector<double> l1;
             std::vector<double> l2;
+            std::vector<double> radii;
 
 
             Cell(int idx,
@@ -36,7 +37,11 @@ namespace DPM {
                 double Kl, double Kb, double Ka, 
                 double v0, double Dr, double Ds, 
                 double a0, double psi);
+
+            Cell(int NV);
             
+            void ResetForces();
+            void FindRadii();
             void PerimeterForceUpdate();
             void AreaForceUpdate();
             void BendingForceUpdate();
