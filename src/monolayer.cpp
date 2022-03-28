@@ -120,14 +120,11 @@ namespace DPM{
 
         while((fcheck > Ftol || fireit < NDELAY) && fireit < itmax){
             P = 0.0;
-
             for(i=0;i<NCELLS;i++){
                 for(vi=0;vi<Cells[i].NV;i++){
-                    P+= sqrt(Cells[i].vx[vi]*Cells[i].vy[vi]) + sqrt(Cells[i].Fx[vi]*Cells[i].Fy[vi]);
+                    P+= sqrt(Cells[i].vx[vi]*Cells[i].Fx[vi]) + sqrt(Cells[i].vy[vi]*Cells[i].Fy[vi]);
                 }
             }
-
-            cout << P << endl;
 
             if(P>0){
                 npPos++;
@@ -177,8 +174,8 @@ namespace DPM{
 
             for(ci=0;ci<NCELLS;ci++){
                 for(vi=0;vi<Cells[ci].NV;vi++){
-                    fnorm += Cells[ci].Fx[vi] + Cells[ci].Fy[vi];
-                    fnorm += Cells[ci].vx[vi] + Cells[ci].vy[vi];
+                    fnorm += pow(Cells[ci].Fx[vi],2.0) + pow(Cells[ci].Fy[vi],2.0);
+                    vnorm += pow(Cells[ci].vx[vi],2.0) + pow(Cells[ci].vy[vi],2.0);
                 }
             }
 
@@ -219,11 +216,12 @@ namespace DPM{
             fcheck = 0.0;
             for(ci=0;ci<NCELLS;ci++){
                 for(vi=0;vi<Cells[ci].NV;vi++){
-                    fcheck += Cells[ci].Fx[vi] + Cells[ci].Fy[vi];
+                    fcheck += pow(Cells[ci].Fx[vi],2) + pow(Cells[ci].Fy[vi],2);
                 }
             }
             fcheck = sqrt(fcheck)/VertDOF;
-            fireit++;
+            fireit++;        
+
         }
         if(fireit == itmax){
             cerr << "(!) Fire Minimization did not converge" << endl;
