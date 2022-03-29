@@ -219,9 +219,17 @@ namespace DPM{
                 }
             }
             fcheck = sqrt(fcheck)/VertDOF;
-            fireit++;        
-
+            fireit++;       
+            if(fireit % 1000 == 0){
+                cout << "FIRE progress update:" << endl;
+                cout << "	 iterations = " << fireit << endl;
+                cout << "	 fcheck = " << fcheck << endl;
+                cout << "	 dt = " << dt << endl;
+                cout << "	 P = " << P << endl;
+                cout << "	 alpha = " << alpha << endl;
+            }
         }
+
         if(fireit == itmax){
             cerr << "(!) Fire Minimization did not converge" << endl;
         }
