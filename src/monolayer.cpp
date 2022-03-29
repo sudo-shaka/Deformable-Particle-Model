@@ -88,7 +88,6 @@ namespace DPM{
                 Cells[i].Y[j] = Cells[i].r0*(sin(2.0*M_PI*(j+1)/Cells[i].NV)) + Y[i];
             }
         }
-        Ftol = U/100;
     }
     void monolayer::VertexFIRE(){
         int ci,vi,i,NDELAY = 20, itmax = 5e4;
