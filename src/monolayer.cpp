@@ -121,19 +121,17 @@ namespace DPM{
             P = 0.0;
             for(i=0;i<NCELLS;i++){
                 for(vi=0;vi<Cells[i].NV;i++){
-                    P+= sqrt(Cells[i].vx[vi]*Cells[i].Fx[vi]) + sqrt(Cells[i].vy[vi]*Cells[i].Fy[vi]);
+                    P+= Cells[i].vx[vi]*Cells[i].Fx[vi] + Cells[i].vy[vi]*Cells[i].Fy[vi];
                 }
             }
 
             if(P>0){
                 npPos++;
                 npNeg = 0;
-                if (npPos > NDELAY){
-                    if(dt * finc < dtmax)
-                        dt *= finc;
-
-                    alpha *= falpha;
+                if (npPos > NDELAY && dt*finc < dtmax){
+                    dt *= finc;
                 }
+                alpha *= falpha;
             }
             else{
                 npPos = 0;
@@ -153,11 +151,11 @@ namespace DPM{
                     }
                 }
 
-                if(fireit > NDELAY){
+                if(fireit > NDELAY && dt*fdec > dtmin){
+                    alpha = alpha0;
                     if(dt*fdec > dtmin){
                         dt *= fdec;
                     }
-                    alpha = alpha0;
                 }
             }
 
