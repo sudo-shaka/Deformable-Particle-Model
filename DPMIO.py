@@ -18,11 +18,43 @@ def OutputMonolayerToFile(monolayer,outfilename):
 
 def OutputCellToFile(Cell,outfilename):
   with open(outfilename,'a') as out:
+    out.write("Cell: ,NV,"+str(len(Cell.X+1)))
     out.write("X,"+str(Cell.X)[1:-1]+'\n')
     out.write("Y,"+str(Cell.Y)[1:-1]+'\n')
     out.write("FX,"+str(Cell.Fx)[1:-1]+'\n')
     out.write("FX,"+str(Cell.Fy)[1:-1]+'\n')
     out.close()
+
+def ReadCellFromFile(infilename):
+  try:
+    import DPM
+  except:
+    print("Error! DPM module not installed")
+  with open(infilename,'r') as f:
+    lines = f.readlines()
+    count = 0
+    CellArr = []
+    for l in lines:
+      data = l.split(",")
+      if l[:4] == "Cell":
+        if count > 0:
+          CellArr.append(C)
+        nv = int(data[3])
+        C = DPM.Cell(nv)
+        count += 1
+      elif l[:1] == "X":
+        C.X = [float(i) for i in data[1:]]
+      elif l[:1] == "Y":
+        C.Y = [float(i) for i  in data[1:]]
+      elif l[:2] == "FX":
+        C.Fx = [float(i) for i in data[1:]]
+      elif l[:2] == "FY":
+        C.Fx = [float(i) for i in data[1:]]
+
+    f.close()
+    return CellArr
+
+
 
 def ReadMonolayerFromFile(infilename):
   try:
@@ -66,4 +98,5 @@ def ReadMonolayerFromFile(infilename):
         Fy = [float(i) for i in data[1:]]
         C.Fy = Fy
 
+  f.close()
   return monolist
