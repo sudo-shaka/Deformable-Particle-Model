@@ -14,7 +14,7 @@ namespace DPM{
         double sumareas = 0.0;
         for(int i=0;i<NCELLS;i++){
             VertDOF += Cells[i].NV;
-            sumareas += M_PI*(Cells[i].r0*Cells[i].r0);
+            sumareas += Cells[i].GetArea();
             Cells[i].idx = i;
         }
         L = sqrt(sumareas)/phi0;
@@ -217,7 +217,7 @@ namespace DPM{
                 }
             }
             fcheck = sqrt(fcheck)/VertDOF;
-            fireit++;       
+            fireit++;
             if(fireit % 1000 == 0){
                 cout << "FIRE progress update:" << endl;
                 cout << "	 iterations = " << fireit << endl;
