@@ -4,7 +4,8 @@ import numpy as np
 
 def PlotDPM(monolayer):
     L = monolayer.BoxLength;
-    plt.figure(figsize=(8,8))
+    #You may want to uncomment if using simulations with many cells
+    #plt.figure(figsize=(8,8))
     for ci in range(monolayer.NCELLS):
         X = []; Y = [];
         for vi in range(len(monolayer.Cells[ci].X)):
