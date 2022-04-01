@@ -18,7 +18,7 @@ def OutputMonolayerToFile(monolayer,outfilename):
 
 def OutputCellToFile(Cell,outfilename):
   with open(outfilename,'a') as out:
-    out.write("Cell: ,NV,"+str(len(Cell.X)+1))
+    out.write("Cell: ,NV,"+str(len(Cell.X)+1)+,"\n")
     out.write("X,"+str(Cell.X)[1:-1]+'\n')
     out.write("Y,"+str(Cell.Y)[1:-1]+'\n')
     out.write("FX,"+str(Cell.Fx)[1:-1]+'\n')
