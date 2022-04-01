@@ -1,9 +1,10 @@
 import DPM
 from matplotlib import pyplot as plt
+import numpy as np
 
-#Simple script to rebox the periodic boundary conditions and then plot using matplotlib
 def PlotDPM(monolayer):
     L = monolayer.BoxLength;
+    plt.figure(figsize=(8,8))
     for ci in range(monolayer.NCELLS):
         X = []; Y = [];
         for vi in range(len(monolayer.Cells[ci].X)):
@@ -19,7 +20,11 @@ def PlotDPM(monolayer):
                 y = monolayer.Cells[ci].Y[vi] - L*(int(abs(monolayer.Cells[ci].Y[vi]-L)/L)+1)
             X.append(x)
             Y.append(y)
-        plt.scatter(X,Y);
-
+        F = [abs(monolayer.Cells[ci].Fx[i]) + abs(monolayer.Cells[ci].Fy[i]) \
+            for i in range(len(monolayer.Cells[ci].X))] 
+        plt.scatter(X,Y,c=F,cmap='coolwarm');
+        #cx = np.mean(x)
+        #cy = np.mean(y)
+        #plt.scatter(cx,cy,color='black')
     plt.axis('equal')
     #plt.show()
