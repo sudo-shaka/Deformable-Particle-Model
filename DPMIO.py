@@ -39,7 +39,7 @@ def ReadCellFromFile(infilename):
       if l[:4] == "Cell":
         if count > 0:
           CellArr.append(C)
-        nv = int(data[3])
+        nv = int(data[2])
         C = DPM.Cell(nv)
         count += 1
       elif l[:1] == "X":
