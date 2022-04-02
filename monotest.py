@@ -1,3 +1,6 @@
+#This code runs the example seen in the README
+
+
 try:
   import DPM
   from matplotlib import pyplot as plt
@@ -11,19 +14,17 @@ def Euler():
   #initialize a cell with calA of 1.4, 32 vertecies, spring and director constants plus an area of 20.
   C = DPM.Cell(1,0,0,1.4,32,1.0,0.5,0.1,0.05,0.2,0.1,20.0,0)
 
-  ncells = 7;
-  packingfraction = 0.85
-  #initialize a monolayer if n number cells and a packing fraction of 
+  ncells = 12;
+  packingfraction = 0.88
+  #initialize a monolayer if n number cells and a packing fraction of
   mono = DPM.monolayer([C]*ncells,packingfraction);
   #Disperse the monolayer using simple hard sphere repulsions
   mono.disperse();
   count = 0;
-  #Set the spring constant for cell-cell interactions
-  mono.Kc = 0.5;
-  
+
   #begining time steps
   dt = 0.001
-  for i in progressbar(range(int(20000))):
+  for i in progressbar(range(10000)):
     #for every cell change the direction its going
     for ci in range(ncells):
       mono.Cells[ci].UpdateDirectorDiffusion(dt)
@@ -36,7 +37,7 @@ def Euler():
       plt.savefig('/tmp/'+str(count)+'.png')
       plt.clf();
       count +=1;
-  
+
   #this is to simply save the image
   with imageio.get_writer('/tmp/out.gif',mode='I') as writer:
     for i in range(count):
