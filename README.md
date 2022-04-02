@@ -7,6 +7,7 @@ To use the model in python type:
 
 import DPM
 
+The below figure shows the output from "monotest.py", the color respresents the total force on each vertex.
 ![out](https://user-images.githubusercontent.com/68864205/161360831-56d26cb1-8585-4685-a922-a52f455e2364.gif)
 
 
