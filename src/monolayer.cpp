@@ -245,9 +245,7 @@ namespace DPM{
         ResetForces();
         //For all the cell,s update the forces based on intracellular shapes
         for(int ci=0;ci<NCELLS;ci++){
-            Cells[ci].AreaForceUpdate();
-            Cells[ci].PerimeterForceUpdate();
-            Cells[ci].BendingForceUpdate();
+            Cells[ci].UpdateShapeForces();
             Cells[ci].DrivingForceUpdate(dt);
         }
         //now update the forces they have on eachother
