@@ -21,6 +21,7 @@ namespace DPM{
             void disperse();
             void VertexFIRE();
             void UpdateEuler(double dt);
+            void UpdateVV(double dt);
             double GetPackingFraction();
             double GetVertexKineticEnergy();
             void FindOverlaps(int ci, int cj);

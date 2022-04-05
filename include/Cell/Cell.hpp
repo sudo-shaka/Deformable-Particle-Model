@@ -33,13 +33,12 @@ namespace DPM {
             Cell(int idx,
                 double x1,double y1,
                 double calA0,
-                int NV, 
-                double Kl, double Kb, double Ka, 
-                double v0, double Dr, double Ds, 
+                int NV,
+                double Kl, double Kb, double Ka,
+                double v0, double Dr, double Ds,
                 double a0, double psi);
 
             Cell(int NV);
-            
             void ResetForces();
             void FindRadii();
             void PerimeterForceUpdate();
@@ -48,7 +47,7 @@ namespace DPM {
             void DrivingForceUpdate(double dt);
             void UpdateShapeForces();
             void UpdateEuler(double dt);
-            void UpdateVV();
+            void UpdateVV(double dt);
             void UpdateDirectorDiffusion(double dt);
             void UpdateDirectorPsi(double newpsi);
             void UpdateStickness(int vertex, double l1, double l2);
