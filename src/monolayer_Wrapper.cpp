@@ -22,6 +22,7 @@ void init_monolayer(py::module &m){
     .def("disperse",&DPM::monolayer::disperse)
     .def("VertexFIRE",&DPM::monolayer::VertexFIRE)
     .def("UpdateEuler",py::overload_cast<double>(&DPM::monolayer::UpdateEuler),py::arg("dt"))
+    .def("UpdateVV",py::overload_cast<double>(&DPM::monolayer::UpdateVV),py::arg("dt"))
     .def("InteractingForceUpdate",&DPM::monolayer::InteractingForceUpdate)
     .def("FindOverlaps",&DPM::monolayer::FindOverlaps)
     .def("GetPackingFraction",&::DPM::monolayer::GetPackingFraction)

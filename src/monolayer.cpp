@@ -239,7 +239,6 @@ namespace DPM{
             cout << "	 P = " << P << endl;
             cout << "	 alpha = " << alpha << endl;
         }
-
     }
     void monolayer::UpdateEuler(double dt){
 
@@ -258,8 +257,35 @@ namespace DPM{
             for(int vi=0;vi<Cells[ci].NV;vi++){
                 Cells[ci].X[vi] += dt*Cells[ci].Fx[vi];
                 Cells[ci].Y[vi] += dt*Cells[ci].Fy[vi];
+                Cells[ci].vx[vi] = 0.5*dt*Cells[ci].Fx[vi];
+                Cells[ci].vy[vi] = 0.5*dt*Cells[ci].Fy[vi];
             }
         }
+    }
+
+    void monolayer::UpdateVV(double dt){
+      vector<double> oldFx;
+      vector<double> oldFy;
+      int ci, vi;
+      for(ci=0;ci<NCELLS;ci++){
+        oldFx.resize(Cells[ci].NV);
+        oldFy.resize(Cells[ci].NV);
+        for(vi=0;vi<Cells[ci].NV;vi++){
+          oldFx[vi] = Cells[ci].Fx[vi];
+          oldFy[vi] = Cells[ci].Fy[vi];
+          //Position update
+          Cells[ci].X[vi] += dt*Cells[ci].vx[vi] + 0.5*dt*dt*(Cells[ci].Fx[vi]);
+          Cells[ci].Y[vi] += dt*Cells[ci].vy[vi] + 0.5*dt*dt*(Cells[ci].Fy[vi]);
+        }
+        Cells[ci].UpdateShapeForces();
+        for(vi=0;vi<Cells[ci].NV;vi++){
+          //Velocity update
+          Cells[ci].vx[vi] += 0.5 * dt * (Cells[ci].Fx[vi]+oldFx[vi]);
+          Cells[ci].vy[vi] += 0.5 * dt * (Cells[ci].Fy[vi]+oldFy[vi]);
+        }
+      }
+      InteractingForceUpdate();
+
     }
 
     double monolayer::GetPackingFraction(){
