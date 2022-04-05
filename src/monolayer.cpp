@@ -379,11 +379,11 @@ namespace DPM{
                     for(vi=0;vi<Cells[ci].NV;vi++){
                         for(vj=0;vj<Cells[cj].NV;vj++){
                             sij = Cells[ci].radii[vi] + Cells[cj].radii[vj];
-                            xij = (rij/sij)/L;
+                            xij = (rij/sij);
                             ftmp = 0.0;
                             if(overlaps[vi]){
                                 //if overlapping repell the particles away from eachothers centers
-                                ftmp = Kc * (1-xij)/abs(sqrt(Cells[ci].a0)/sij);
+                                ftmp = Kc * (xij)/abs(sqrt(Cells[ci].a0)*sij);
                                 U += 0.5*Kc * pow(1-sij/rij,2);
                             }
                             else{
@@ -393,7 +393,6 @@ namespace DPM{
                                 if(rij >= cutij && rij <= shellij){
                                     kint = (Kc*Cells[ci].l1[vi])/(Cells[ci].l2[vi]-Cells[ci].l1[vi]);
                                     ftmp = kint * (xij - (1.0 - Cells[ci].l2[vi]))/sij;
-                                    //ftmp = 0.0;
                                 }
                             }
                             //force update
