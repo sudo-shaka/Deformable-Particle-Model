@@ -47,7 +47,7 @@ void init_Cell(py::module &m){
     .def("UpdateEuler",py::overload_cast<double>(&DPM::Cell::UpdateEuler),py::arg("dt"))
     .def("UpdateVV",py::overload_cast<double>(&DPM::Cell::UpdateVV),py::arg("dt"))
     .def("UpdateDirectorDiffusion",py::overload_cast<double>(&DPM::Cell::UpdateDirectorDiffusion),py::arg("dt"))
-    .def("UpdateStickyness",py::overload_cast<int, double, double>(&DPM::Cell::UpdateStickness),py::arg("vertexindex"),py::arg("l1"),py::arg("l2"))
+    .def("SetCalA0",py::overload_cast<double>(&DPM::Cell::SetCalA0),py::arg("calA0"))
     .def("GetPerim", &DPM::Cell::GetPerim)
     .def("GetArea",&DPM::Cell::GetArea)
     .def("GetCenterX",&DPM::Cell::GetCenterX)

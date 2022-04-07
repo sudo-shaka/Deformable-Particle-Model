@@ -212,9 +212,10 @@ namespace DPM{
         psi += sqrt(2.0*dt*Dr)*grv;
     }
 
-    void Cell::UpdateStickness(int vertex, double newl1, double newl2){
-        l1[vertex] = newl1;
-        l2[vertex] = newl2;
+
+    void Cell::SetCalA0(double newCalA0){
+      calA0 = newCalA0*(NV*tan(M_PI/NV)/M_PI);
+      l0 = 2.0 * sqrt(M_PI*calA0*a0)/NV;
     }
 
     double Cell::GetPerim(){
@@ -231,7 +232,7 @@ namespace DPM{
 	    double Area = 0.0;
         int j = NV-1;
 	    for (int i = 0; i < NV; i++) {
-	    	Area += 0.5 * ((X[j] + X[i]) * (Y[j] - Y[i]));
+            Area += 0.5 * ((X[j] + X[i]) * (Y[j] - Y[i]));
             j = i;
         }
         return abs(Area);

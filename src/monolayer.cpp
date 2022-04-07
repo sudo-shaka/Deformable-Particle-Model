@@ -3,8 +3,6 @@
 #include <vector>
 #include <iostream>
 
-using namespace std;
-
 namespace DPM{
     monolayer::monolayer(std::vector<DPM::Cell> inputCells, double phi0input){
         Cells = inputCells;
@@ -138,7 +136,7 @@ namespace DPM{
                 npNeg++;
 
                 if(npNeg > NNEGMAX){
-                    cerr << "ERROR during FIRE, P<0 for too long..." << endl;
+                    std::cerr << "ERROR during FIRE, P<0 for too long..." << std::endl;
                     return;
                 }
 
@@ -219,25 +217,25 @@ namespace DPM{
             fcheck = sqrt(fcheck)/VertDOF;
             fireit++;
             if(fireit % 1000 == 0){
-                cout << "FIRE progress update:" << endl;
-                cout << "	 iterations = " << fireit << endl;
-                cout << "	 fcheck = " << fcheck << endl;
-                cout << "	 dt = " << dt << endl;
-                cout << "	 P = " << P << endl;
-                cout << "	 alpha = " << alpha << endl;
+                std::cout << "FIRE progress update:" << std::endl;
+                std::cout << "	 iterations = " << fireit << std::endl;
+                std::cout << "	 fcheck = " << fcheck << std::endl;
+                std::cout << "	 dt = " << dt << std::endl;
+                std::cout << "	 P = " << P << std::endl;
+                std::cout << "	 alpha = " << alpha << std::endl;
             }
         }
 
         if(fireit == itmax){
-            cerr << "(!) Fire Minimization did not converge" << endl;
+            std::cerr << "(!) Fire Minimization did not converge" << std::endl;
         }
         else{
-            cout << "FIRE Minimization Converged in "<< fireit << " timesteps" << endl;
-            cout << "	 iterations = " << fireit << endl;
-            cout << "	 fcheck = " << fcheck << endl;
-            cout << "	 dt = " << dt << endl;
-            cout << "	 P = " << P << endl;
-            cout << "	 alpha = " << alpha << endl;
+            std::cout << "FIRE Minimization Converged in "<< fireit << " timesteps" << std::endl;
+            std::cout << "	 iterations = " << fireit << std::endl;
+            std::cout << "	 fcheck = " << fcheck << std::endl;
+            std::cout << "	 dt = " << dt << std::endl;
+            std::cout << "	 P = " << P << std::endl;
+            std::cout << "	 alpha = " << alpha << std::endl;
         }
     }
     void monolayer::UpdateEuler(double dt){
@@ -262,8 +260,8 @@ namespace DPM{
     }
 
     void monolayer::UpdateVV(double dt){
-      vector<double> oldFx;
-      vector<double> oldFy;
+      std::vector<double> oldFx;
+      std::vector<double> oldFy;
       int ci, vi;
       for(ci=0;ci<NCELLS;ci++){
         oldFx.resize(Cells[ci].NV);
@@ -289,7 +287,7 @@ namespace DPM{
     double monolayer::GetPackingFraction(){
         double sumCellArea=0, BoxArea = L*L;
         for(int i=0;i<NCELLS;i++){
-            sumCellArea += Cells[i].GetArea();
+           sumCellArea += Cells[i].GetArea();
         }
 
         return sumCellArea/BoxArea;
@@ -305,7 +303,7 @@ namespace DPM{
     }
     void monolayer::FindOverlaps(int ci, int cj){
         if(ci > NCELLS || cj > NCELLS){
-            cout << "Error, cell index not found!" << endl;
+            std::cout << "Error, cell index not found!" << std::endl;
             return;
         }
         int NVi = Cells[ci].NV, NVj = Cells[cj].NV, vi, vj;
