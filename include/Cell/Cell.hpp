@@ -50,7 +50,7 @@ namespace DPM {
             void UpdateVV(double dt);
             void UpdateDirectorDiffusion(double dt);
             void UpdateDirectorPsi(double newpsi);
-            void UpdateStickness(int vertex, double l1, double l2);
+            void SetCalA0(double newCalA0);
             double GetPerim();
             double GetArea();
             double GetCenterX();
