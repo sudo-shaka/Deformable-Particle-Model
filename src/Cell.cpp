@@ -199,8 +199,8 @@ namespace DPM{
       UpdateShapeForces();
 
       for(i=0;i<NV;i++){
-        vx[i] += 0.5*dt*(Fx[i]*oldFx[i]);
-        vy[i] += 0.5*dt*(Fy[i]*oldFy[i]);
+        vx[i] += 0.5*dt*(Fx[i]+oldFx[i]);
+        vy[i] += 0.5*dt*(Fy[i]+oldFy[i]);
       }
     }
 
