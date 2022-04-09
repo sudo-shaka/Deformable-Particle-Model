@@ -27,5 +27,6 @@ namespace DPM{
             void FindOverlaps(int ci, int cj);
             void InteractingForceUpdate();
             void ResetForces();
+            void CellDivision(int cellidx);
     };
 }
