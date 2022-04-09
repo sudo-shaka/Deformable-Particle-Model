@@ -13,6 +13,7 @@ void init_monolayer(py::module &m){
     .def_readonly("phi0",&DPM::monolayer::phi0)
     .def_readonly("NCELLS",&DPM::monolayer::NCELLS)
     .def_readonly("vertDOF",&DPM::monolayer::VertDOF)
+    .def_readonly("PotentialEnergy",&DPM::monolayer::U)
     .def_readwrite("Cells",&DPM::monolayer::Cells)
     .def_readwrite("BoxLength",&DPM::monolayer::L)
     .def_readwrite("Kc",&DPM::monolayer::Kc)
@@ -27,5 +28,6 @@ void init_monolayer(py::module &m){
     .def("FindOverlaps",&DPM::monolayer::FindOverlaps)
     .def("GetPackingFraction",&::DPM::monolayer::GetPackingFraction)
     .def("ResetForces",&DPM::monolayer::ResetForces)
+    .def("CellDivide",py::overload_cast<int>(&DPM::monolayer::CellDivision),py::arg("CellIdx"))
     ;
 }

@@ -17,8 +17,8 @@ namespace DPM{
         }
         L = sqrt(sumareas)/phi0;
         Kc = 1.0;
-        Ftol = 1e-2;
-        dt0 = 0.001;
+        Ftol = 1e-5;
+        dt0 = 1e-3;
         U = 0.0;
     }
 
@@ -377,12 +377,12 @@ namespace DPM{
                     for(vi=0;vi<Cells[ci].NV;vi++){
                         for(vj=0;vj<Cells[cj].NV;vj++){
                             sij = Cells[ci].radii[vi] + Cells[cj].radii[vj];
-                            xij = (rij/sij);
+                            xij = rij/sij;
                             ftmp = 0.0;
                             if(overlaps[vi]){
                                 //if overlapping repell the particles away from eachothers centers
-                                ftmp = Kc * (xij)/abs(sqrt(Cells[ci].a0)*sij);
-                                U += 0.5*Kc * pow(1-sij/rij,2);
+                                ftmp = Kc*(xij)/abs(sqrt(Cells[ci].a0)*sij);
+                                U += 0.5*Kc * pow(1-xij,2);
                             }
                             else{
                                 shellij = (1.0+Cells[ci].l2[vi])*sij;
@@ -391,6 +391,7 @@ namespace DPM{
                                 if(rij >= cutij && rij <= shellij){
                                     kint = (Kc*Cells[ci].l1[vi])/(Cells[ci].l2[vi]-Cells[ci].l1[vi]);
                                     ftmp = kint * (xij - (1.0 - Cells[ci].l2[vi]))/sij;
+                                    U += -0.5*kint*pow(1.0 + Cells[ci].l2[vi] - xij,2.0);
                                 }
                             }
                             //force update
@@ -414,6 +415,43 @@ namespace DPM{
                 Cells[ci].vy[vi] = 0.0;
             }
         }
+    }
+
+
+    //Biological Processes
+    void monolayer::CellDivision(int ci){
+        //first do some checks
+        if(ci > NCELLS-1){
+            std::cout << "Error: Index out of range" << std::endl;
+            return;
+        }
+        double packing = GetPackingFraction();
+        double packingincrease = Cells[ci].GetArea() / (L*L);
+        double newpacking = packingincrease + packing;
+        if(newpacking > 0.95){
+            std::cout << "Warning packing fraction is > 0.95\n";
+        }
+        else if(newpacking > 1.0){
+            std::cout << "Cannot divide: Would make packing greater than 100%\n";
+            return;
+        }
+
+
+        double movex, movey, radii;
+        NCELLS ++;
+        radii = Cells[ci].r0;
+        movex = (radii * cos(Cells[ci].psi))/2.0;
+        movey = (radii * sin(Cells[ci].psi))/2.0;
+        Cells[ci].ResetForces();
+        DPM::Cell DaugterCell = Cells[ci];
+        for(int vi = 0; vi < Cells[ci].NV; vi++){
+            Cells[ci].X[vi] += movex;
+            Cells[ci].Y[vi] += movey;
+            DaugterCell.X[vi] -= movex;
+            DaugterCell.Y[vi] -= movey; 
+        }
+
+        Cells.push_back(DaugterCell);
     }
 
 }
