@@ -6,8 +6,7 @@ namespace py = pybind11;
 
 void init_Cell(py::module &m){
     py::class_<DPM::Cell>(m, "Cell")
-    .def(py::init<int, double, double, double, int, double, double,double,double,double,double,double,double>(),
-    py::arg("idx"),
+    .def(py::init<double, double, double, int, double, double,double,double,double,double,double,double>(),
     py::arg("x1"),
     py::arg("y1"),
     py::arg("calA0"),

@@ -13,7 +13,6 @@ namespace DPM{
         for(int i=0;i<NCELLS;i++){
             VertDOF += Cells[i].NV;
             sumareas += Cells[i].GetArea();
-            Cells[i].idx = i;
         }
         L = sqrt(sumareas)/phi0;
         Kc = 1.0;
@@ -242,7 +241,7 @@ namespace DPM{
         int ci, vi;
         for(int step=0;step<nsteps;step++){
             ResetForces();
-            //For all the cell,s update the forces based on intracellular shapes
+            //For all the cells update the forces based on intracellular shapes
             for(ci=0;ci<NCELLS;ci++){
                 Cells[ci].UpdateShapeForces();
                 Cells[ci].DrivingForceUpdate(dt);
@@ -365,11 +364,9 @@ namespace DPM{
         for(ci=0;ci<NCELLS;ci++){
             cxi = Cells[ci].GetCenterX();
             cyi = Cells[ci].GetCenterY();
-            Cells[ci].FindRadii();
             for(cj=0;cj<NCELLS;cj++){
                 if(ci!=cj){
                     FindOverlaps(ci,cj);
-                    Cells[cj].FindRadii();
                     cxj = Cells[cj].GetCenterX();
                     cyj = Cells[cj].GetCenterY();
                     dx = cxj-cxi;
@@ -379,12 +376,12 @@ namespace DPM{
                     rij = sqrt(dx*dx + dy*dy);
                     for(vi=0;vi<Cells[ci].NV;vi++){
                         for(vj=0;vj<Cells[cj].NV;vj++){
-                            sij = Cells[ci].radii[vi] + Cells[cj].radii[vj];
+                            sij = sqrt(Cells[ci].a0) + sqrt(Cells[cj].a0);
                             xij = rij/sij;
                             ftmp = 0.0;
                             if(overlaps[vi]){
                                 //if overlapping repell the particles away from eachothers centers
-                                ftmp = Kc*(xij)/abs(sqrt(Cells[ci].a0)*sij);
+                                ftmp = Kc*(1-xij)/(sqrt(Cells[ci].a0)/sij);
                                 U += 0.5*Kc * pow(1-xij,2);
                             }
                             else{

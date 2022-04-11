@@ -58,6 +58,41 @@ def ReadCellFromFile(infilename):
     f.close()
     return CellArr
 
+def ReadMonolayerFromParams(infilename):
+  try:
+    import DPM
+  except:
+    print("Error! DPM package not installed")
+  
+  with open(infilename,'r') as f:
+    lines = f.readlines();
+    isgettingcelldata = False
+    Celllist = []
+    try:
+      for l in lines:
+        data = l.split(',')
+        if l[:1] == "L":
+          BoxLength = float(data[1])
+        elif l[:2] == "Kc":
+          Kc = float(data[1]);
+        elif l[:1] == "X":
+          isgettingcelldata = True
+        elif isgettingcelldata and len(data) == 12:
+          p = [float(i) for i in data]
+          X = p[0]; Y = p[1]
+          cala0 = p[2]; nv = p[3]
+          Kl = p[4]; Kb = p[5]; Ka = p[6]
+          v0 = p[7]; Dr = p[8]; Ds = p[9]; psi = p[11]
+          a0 = p[10]
+          Celllist.append(DPM.Cell(X,Y,cala0,int(nv),Ka,Kb,Ka,v0,Dr,Ds,a0,psi))
+    except:
+      print('Error parsing input file')
+    
+  mono = DPM.monolayer(Celllist,1.0)
+  mono.BoxLength = BoxLength
+  mono.Kc = Kc
+  return mono
+
 
 
 def ReadMonolayerFromFile(infilename):
@@ -104,3 +139,4 @@ def ReadMonolayerFromFile(infilename):
 
   f.close()
   return monolist
+

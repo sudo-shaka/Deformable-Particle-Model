@@ -3,7 +3,6 @@ namespace DPM {
     class Cell
     {
         public:
-            int idx;
             int NV;
             double calA0;
             double l0;
@@ -30,8 +29,7 @@ namespace DPM {
             std::vector<double> radii;
 
 
-            Cell(int idx,
-                double x1,double y1,
+            Cell(double x1,double y1,
                 double calA0,
                 int NV,
                 double Kl, double Kb, double Ka,
