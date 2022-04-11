@@ -20,8 +20,8 @@ namespace DPM{
             //functions
             void disperse();
             void VertexFIRE();
-            void UpdateEuler(double dt);
-            void UpdateVV(double dt);
+            void UpdateEuler(int nsteps, double dt);
+            void UpdateVV(int nsteps, double dt);
             double GetPackingFraction();
             double GetVertexKineticEnergy();
             void FindOverlaps(int ci, int cj);

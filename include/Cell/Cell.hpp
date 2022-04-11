@@ -46,8 +46,8 @@ namespace DPM {
             void BendingForceUpdate();
             void DrivingForceUpdate(double dt);
             void UpdateShapeForces();
-            void UpdateEuler(double dt);
-            void UpdateVV(double dt);
+            void UpdateEuler(int nsteps,double dt);
+            void UpdateVV(int nsteps, double dt);
             void UpdateDirectorDiffusion(double dt);
             void UpdateDirectorPsi(double newpsi);
             void SetCalA0(double newCalA0);
