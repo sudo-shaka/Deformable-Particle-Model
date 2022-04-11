@@ -1,6 +1,4 @@
 #This code runs the example seen in the README
-
-
 try:
   import DPM
   from matplotlib import pyplot as plt
@@ -23,20 +21,14 @@ def Euler():
   count = 0;
 
   #begining time steps
-  dt = 0.001
-  for i in progressbar(range(10000)):
-    #for every cell change the direction its going
-    for ci in range(ncells):
-      mono.Cells[ci].UpdateDirectorDiffusion(dt)
-    #update the positions with a dt of 0.001
-    mono.UpdateEuler(dt);
-    #plot every 1000 time steps
-    if i % 1000 == 0:
-      PlotDPM(mono)
-      plt.axis('equal')
-      plt.savefig('/tmp/'+str(count)+'.png')
-      plt.clf();
-      count +=1;
+  dt = 0.001; nsteps = 1000;
+  for i in progressbar(range(50)):
+    mono.UpdateEuler(nsteps,dt);
+    PlotDPM(mono)
+    plt.axis('equal')
+    plt.savefig('/tmp/'+str(count)+'.png')
+    plt.clf();
+    count +=1;
 
   #this is to simply save the image
   with imageio.get_writer('/tmp/out.gif',mode='I') as writer:
@@ -47,7 +39,6 @@ def Euler():
   #return the monolayer
   print('Image is saved to "/tmp/out.gif"')
   return mono
-
 
 if __name__ == "__main__":
   Euler();
