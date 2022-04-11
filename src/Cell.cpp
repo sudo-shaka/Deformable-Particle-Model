@@ -171,36 +171,40 @@ namespace DPM{
         BendingForceUpdate();
     }
 
-    void Cell::UpdateEuler(double dt){
-        UpdateShapeForces();
-        DrivingForceUpdate(dt);
-        for(int i=0; i<NV; i++){
-            X[i] += Fx[i]*dt;
-            Y[i] += Fy[i]*dt;
-            vx[i] = 0.5*Fx[i]*dt;
-            vy[i] = 0.5*Fy[i]*dt;
+    void Cell::UpdateEuler(int nsteps, double dt){
+        int i, step;
+        for(step=0;step<nsteps;step++){
+            UpdateShapeForces();
+            DrivingForceUpdate(dt);
+            for(i=0; i<NV; i++){
+                X[i] += Fx[i]*dt;
+                Y[i] += Fy[i]*dt;
+                vx[i] = 0.5*Fx[i]*dt;
+                vy[i] = 0.5*Fy[i]*dt;
+            }
         }
     }
 
-    void Cell::UpdateVV(double dt){
+    void Cell::UpdateVV(int nsteps, double dt){
       std::vector<double> oldFx;
       std::vector<double> oldFy;
-      int i;
+      int i,step;
       oldFx.resize(NV);
       oldFy.resize(NV);
+      for(step=0;step<nsteps;step++){
+        for(i=0;i<NV;i++){
+            oldFx[i] = Fx[i];
+            oldFy[i] = Fy[i];
+            X[i] += dt*vx[i] + 0.5*dt*dt*(Fx[i]);
+            Y[i] += dt*vy[i] + 0.5*dt*dt*(Fy[i]);
+        }
 
-      for(i=0;i<NV;i++){
-        oldFx[i] = Fx[i];
-        oldFy[i] = Fy[i];
-        X[i] += dt*vx[i] + 0.5*dt*dt*(Fx[i]);
-        Y[i] += dt*vy[i] + 0.5*dt*dt*(Fy[i]);
-      }
+        UpdateShapeForces();
 
-      UpdateShapeForces();
-
-      for(i=0;i<NV;i++){
-        vx[i] += 0.5*dt*(Fx[i]+oldFx[i]);
-        vy[i] += 0.5*dt*(Fy[i]+oldFy[i]);
+        for(i=0;i<NV;i++){
+            vx[i] += 0.5*dt*(Fx[i]+oldFx[i]);
+            vy[i] += 0.5*dt*(Fy[i]+oldFy[i]);
+        }
       }
     }
 
