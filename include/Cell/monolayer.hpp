@@ -15,9 +15,10 @@ namespace DPM{
             double Ftol;
             double dt0;
             double U;
+            bool pinning;
             std::vector<DPM::Cell> Cells;
             std::vector<bool> overlaps;
-            //functions
+             //functions
             void disperse();
             void VertexFIRE();
             void UpdateEuler(int nsteps, double dt);
@@ -28,5 +29,9 @@ namespace DPM{
             void InteractingForceUpdate();
             void ResetForces();
             void CellDivision(int cellidx);
+            void FindNearestNeighbor();
+            void StartPinning();
+            void StopPinning();
+            void FindNearestNeighbor(int ci);
     };
 }

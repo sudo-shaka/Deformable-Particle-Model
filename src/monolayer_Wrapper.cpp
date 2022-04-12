@@ -29,5 +29,7 @@ void init_monolayer(py::module &m){
     .def("GetPackingFraction",&::DPM::monolayer::GetPackingFraction)
     .def("ResetForces",&DPM::monolayer::ResetForces)
     .def("CellDivide",py::overload_cast<int>(&DPM::monolayer::CellDivision),py::arg("CellIdx"))
+    .def("StartPinning",&DPM::monolayer::StartPinning)
+    .def("StopPinning",&DPM::monolayer::StopPinning)
     ;
 }

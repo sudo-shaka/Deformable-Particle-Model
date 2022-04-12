@@ -24,6 +24,7 @@ namespace DPM{
         X.resize(NV); Y.resize(NV); l1.resize(NV); l2.resize(NV);
         Fx.resize(NV); Fy.resize(NV); vx.resize(NV); vy.resize(NV);
         im1.resize(NV); ip1.resize(NV); radii.resize(NV);
+        NearestCellIdx.resize(NV); NearestVertexIdx.resize(NV); 
 
         for(int i=0; i<NV; i++){
             X[i] = r0*(cos(2.0*M_PI*(i+1)/NV)) + x1;

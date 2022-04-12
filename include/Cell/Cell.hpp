@@ -27,6 +27,8 @@ namespace DPM {
             std::vector<double> l1;
             std::vector<double> l2;
             std::vector<double> radii;
+            std::vector<int> NearestVertexIdx;
+            std::vector<int> NearestCellIdx;
 
 
             Cell(double x1,double y1,

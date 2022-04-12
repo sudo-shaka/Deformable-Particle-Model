@@ -19,8 +19,8 @@ namespace DPM{
         Ftol = 1e-5;
         dt0 = 1e-3;
         U = 0.0;
+        pinning = false;
     }
-
     void monolayer::disperse(){
         std::vector<double> X,Y,Fx,Fy;
         X.resize(NCELLS);Y.resize(NCELLS);
@@ -367,47 +367,74 @@ namespace DPM{
         int ci,cj,vi,vj;
         double cxi,cyi,cxj,cyj,dx,dy,sij,rij;
         double shellij,cutij,xij,kint,ftmp;
-        for(ci=0;ci<NCELLS;ci++){
-            cxi = Cells[ci].GetCenterX();
-            cyi = Cells[ci].GetCenterY();
-            Cells[ci].FindRadii();
-            for(cj=0;cj<NCELLS;cj++){
-                if(ci!=cj){
-                    FindOverlaps(ci,cj);
-                    Cells[cj].FindRadii();
-                    cxj = Cells[cj].GetCenterX();
-                    cyj = Cells[cj].GetCenterY();
-                    dx = cxj-cxi;
-                    dx -= L*round(dx/L);
-                    dy  = cyj-cyi;
-                    dy -= L*round(dy/L);
-                    rij = sqrt(dx*dx + dy*dy);
-                    for(vi=0;vi<Cells[ci].NV;vi++){
-                        for(vj=0;vj<Cells[cj].NV;vj++){
-                            sij = sqrt(M_PI)*Cells[ci].radii[vi] + sqrt(M_PI)*Cells[cj].radii[vj];
-                            xij = rij/sij;
-                            ftmp = 0.0;
-                            if(overlaps[vi]){
-                                //if overlapping repell the particles away from eachothers centers
-                                ftmp = Kc*(1-xij)/(sqrt(Cells[ci].a0)/sij);
-                                U += 0.5*Kc * pow(1-xij,2);
-                            }
-                            else{
-                                shellij = (1.0+Cells[ci].l2[vi])*sij;
-                                cutij = (1.0+Cells[ci].l1[vi])*sij;
-                                //if not overlapping, see if they are within attractive distance
-                                if(rij >= cutij && rij <= shellij){
-                                    kint = (Kc*Cells[ci].l1[vi])/(Cells[ci].l2[vi]-Cells[ci].l1[vi]);
-                                    ftmp = kint * (xij - (1.0 - Cells[ci].l2[vi]))/sij;
-                                    U += -0.5*kint*pow(1.0 + Cells[ci].l2[vi] - xij,2.0);
+        if(!pinning){
+            for(ci=0;ci<NCELLS;ci++){
+                cxi = Cells[ci].GetCenterX();
+                cyi = Cells[ci].GetCenterY();
+                Cells[ci].FindRadii();
+                for(cj=0;cj<NCELLS;cj++){
+                    if(ci!=cj){
+                        FindOverlaps(ci,cj);
+                        Cells[cj].FindRadii();
+                        cxj = Cells[cj].GetCenterX();
+                        cyj = Cells[cj].GetCenterY();
+                        dx = cxj-cxi;
+                        dx -= L*round(dx/L);
+                        dy  = cyj-cyi;
+                        dy -= L*round(dy/L);
+                        rij = sqrt(dx*dx + dy*dy);
+                        for(vi=0;vi<Cells[ci].NV;vi++){
+                            for(vj=0;vj<Cells[cj].NV;vj++){
+                                sij = sqrt(M_PI)*Cells[ci].radii[vi] + sqrt(M_PI)*Cells[cj].radii[vj];
+                                xij = rij/sij;
+                                ftmp = 0.0;
+                                if(overlaps[vi]){
+                                    //if overlapping repell the particles away from eachothers centers
+                                    ftmp = Kc*(1-xij)/(sqrt(Cells[ci].a0)/sij);
+                                    U += 0.5*Kc * pow(1-xij,2);
                                 }
+                                else{
+                                    shellij = (1.0+Cells[ci].l2[vi])*sij;
+                                    cutij = (1.0+Cells[ci].l1[vi])*sij;
+                                    //if not overlapping, see if they are within attractive distance
+                                    if(rij >= cutij && rij <= shellij){
+                                        kint = (Kc*Cells[ci].l1[vi])/(Cells[ci].l2[vi]-Cells[ci].l1[vi]);
+                                        ftmp = kint * (xij - (1.0 - Cells[ci].l2[vi]))/sij;
+                                        U += -0.5*kint*pow(1.0 + Cells[ci].l2[vi] - xij,2.0);
+                                    }
+                                }
+                                //force update
+                                Cells[ci].Fx[vi] -= ftmp * (dx/rij);
+                                Cells[ci].Fy[vi] -= ftmp * (dy/rij);
+                                Cells[cj].Fx[vj] += ftmp * (dx/rij);
+                                Cells[cj].Fy[vj] += ftmp * (dy/rij);
                             }
-                            //force update
-                            Cells[ci].Fx[vi] -= ftmp * (dx/rij);
-                            Cells[ci].Fy[vi] -= ftmp * (dy/rij);
-                            Cells[cj].Fx[vj] += ftmp * (dx/rij);
-                            Cells[cj].Fy[vj] += ftmp * (dy/rij);
                         }
+                    }
+                }
+            }
+        }
+
+        if(pinning){
+            for(ci=0;ci<NCELLS;ci++){
+                for(vi=0;vi<Cells[ci].NV;vi++){
+                    dx = Cells[ci].X[vi] - Cells[Cells[ci].NearestCellIdx[vi]].X[Cells[ci].NearestVertexIdx[vi]];
+                    dy = Cells[ci].Y[vi] - Cells[Cells[ci].NearestCellIdx[vi]].Y[Cells[ci].NearestVertexIdx[vi]];
+                    dx -= L*round(dx/L);
+                    dy -= L*round(dx/L);
+                    // rij here referes to vertex vertex distance
+                    rij = sqrt(dx*dx + dy*dy);
+                    if(rij < 0.0){
+                        rij *= -1;
+                    }
+                    sij = sqrt(Cells[ci].a0);
+                    xij = rij/sij;
+                    ftmp = Kc*(1.0-xij)/(sij);
+                    if(rij < Cells[ci].r0/20){
+                        Cells[ci].Fx[vi] -= ftmp * (dx/rij);
+                        Cells[ci].Fy[vi] -= ftmp * (dy/rij);
+                        Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
+                        Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
                     }
                 }
             }
@@ -425,6 +452,47 @@ namespace DPM{
         }
     }
 
+    //stickyness
+    void monolayer::FindNearestNeighbor(int ci)
+    {
+        int vi,cj,vj;
+        double dx,dy,dist,mindist;
+        for(vi=0;vi<Cells[ci].NV; vi++){
+            mindist = L;
+            for(cj=0;cj<NCELLS;cj++){
+                if(ci != cj)
+                {
+                    for(vj=0;vj<Cells[cj].NV;vj++){
+                        dx = Cells[cj].X[vj] - Cells[ci].X[vi];
+                        dy = Cells[cj].Y[vj] - Cells[ci].Y[vi];
+                        dx -= L*round(dx/L);
+                        dy -= L*round(dy/L);
+                        if(dx < 0.0)
+                            dx *= -1;
+                        if(dy < 0.0)
+                            dy *= -1;
+                        dist = dx+dy;
+                        if(dist<mindist){
+                            mindist = dist;
+                            Cells[ci].NearestVertexIdx[vi] = vj;
+                            Cells[ci].NearestCellIdx[vi] = cj;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void monolayer::StartPinning(){
+        pinning = true;
+        for(int ci=0;ci<NCELLS;ci++){
+            FindNearestNeighbor(ci);
+        }
+    }
+
+    void monolayer::StopPinning(){
+        pinning = false;
+    }
 
     //Biological Processes
     void monolayer::CellDivision(int ci){
