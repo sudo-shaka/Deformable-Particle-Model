@@ -21,7 +21,7 @@ def Euler():
     PlotDPM(mono)
     plt.axis('equal')
     plt.savefig('/tmp/'+str(i)+'.png')
-    plt.clf();
+    plt.close();
     mono.UpdateEuler(nsteps,dt);
 
   #this is to simply save the image
