@@ -364,11 +364,11 @@ namespace DPM{
         for(ci=0;ci<NCELLS;ci++){
             cxi = Cells[ci].GetCenterX();
             cyi = Cells[ci].GetCenterY();
-            //Cells[ci].FindRadii();
+            Cells[ci].FindRadii();
             for(cj=0;cj<NCELLS;cj++){
                 if(ci!=cj){
                     FindOverlaps(ci,cj);
-                    //Cells[cj].FindRadii();
+                    Cells[cj].FindRadii();
                     cxj = Cells[cj].GetCenterX();
                     cyj = Cells[cj].GetCenterY();
                     dx = cxj-cxi;
