@@ -223,11 +223,15 @@ namespace DPM{
     double Cell::GetPerim(){
         double dx, dy, dist=0.0;
         for(int i=0; i < NV; i++){
-            dx = abs(X[ip1[i]]-X[i]);
-            dy = abs(Y[ip1[i]]-Y[i]);
-            dist += dx + dy;
+            dx = X[ip1[i]]-X[i];
+            if(dx < 0.0)
+                dx *= -1;
+            dy = Y[ip1[i]]-Y[i];
+            if(dy < 0.0)
+                dy *= -1;
+            dist += sqrtl(dx*dx + dy*dy);
         }
-        return sqrt(dist);
+        return dist;
     }
 
     double Cell::GetArea(){
@@ -237,7 +241,9 @@ namespace DPM{
             Area += 0.5 * ((X[j] + X[i]) * (Y[j] - Y[i]));
             j = i;
         }
-        return abs(Area);
+        if(Area < 0.0)
+            Area *= -1;
+        return Area;
     }
 
     double Cell::GetShapeParam(){
@@ -267,12 +273,17 @@ namespace DPM{
     void Cell::FindRadii(){
         double cx = GetCenterX();
         double cy = GetCenterY();
-        double dx,dy;
+        long double dx,dy;
 
         for(int i=0;i<NV;i++){
-            dx = abs(X[i] - cx);
-            dy = abs(Y[i] - cy);
-            radii[i] = sqrt(dx*dx + dy*dy);
+            dx = X[i] - cx;
+            dy = Y[i] - cy;
+            if(dx < 0.0)
+                dx *= -1;
+            if(dy < 0.0)
+                dy *= -1;
+
+            radii[i] = sqrtl((dx*dx) + (dy*dy));
         }
     }
 
