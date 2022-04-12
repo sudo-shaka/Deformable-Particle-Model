@@ -33,7 +33,7 @@ namespace DPM{
             Y[i] = drand48() * L;
         }
         double oldU = 100, dU = 100;
-        while(abs(dU) > 1e-6){
+        while(dU > 1e-6){
             U = 0;
             for(i=0;i<NCELLS;i++){
                 Fx[i] = 0.0;
@@ -53,7 +53,9 @@ namespace DPM{
                         dy = yj-yi;
                         dy -= L*round(dy/L);
                         dist = sqrt(dx*dx + dy*dy);
-                        if(abs(dist) <= (ri+rj)){
+                        if(dist < 0.0)
+                            dist *= -1;
+                        if(dist <= (ri+rj)){
                             ux = dx/dist;
                             uy = dy/dist;
                             ftmp = (1.0-dist/(ri+rj))/(ri+rj);
@@ -73,6 +75,8 @@ namespace DPM{
                 Y[i] += 0.01*Fy[i];
             }
             dU = U-oldU;
+            if(dU < 0.0)
+                dU *= -1;
             oldU = U;
             count++;
             if(count > 1e5){
@@ -298,7 +302,9 @@ namespace DPM{
         double K = 0.0;
         for(int ci=0;ci<NCELLS;ci++){
             for(int vi=0;vi<Cells[ci].NV;vi++){
-                K += 0.5*abs(Cells[ci].vx[vi] + Cells[ci].vy[vi]);
+                K += 0.5*(Cells[ci].vx[vi] + Cells[ci].vy[vi]);
+                if(K < 0.0)
+                    K *= -1;
             }
         }
         return K;
