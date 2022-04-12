@@ -37,6 +37,7 @@ void init_Cell(py::module &m){
     .def_readwrite("l1",&DPM::Cell::l1)
     .def_readwrite("l2",&DPM::Cell::l2)
     .def_readwrite("psi",&DPM::Cell::psi)
+    .def_readonly("radii",&DPM::Cell::radii)
     .def("ResetForces",&DPM::Cell::ResetForces)
     .def("PerimeterForceUpdate",&DPM::Cell::PerimeterForceUpdate)
     .def("AreaForceUpdate", &DPM::Cell::AreaForceUpdate)

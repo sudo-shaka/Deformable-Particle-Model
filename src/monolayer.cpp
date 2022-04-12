@@ -364,9 +364,11 @@ namespace DPM{
         for(ci=0;ci<NCELLS;ci++){
             cxi = Cells[ci].GetCenterX();
             cyi = Cells[ci].GetCenterY();
+            //Cells[ci].FindRadii();
             for(cj=0;cj<NCELLS;cj++){
                 if(ci!=cj){
                     FindOverlaps(ci,cj);
+                    //Cells[cj].FindRadii();
                     cxj = Cells[cj].GetCenterX();
                     cyj = Cells[cj].GetCenterY();
                     dx = cxj-cxi;
@@ -376,7 +378,7 @@ namespace DPM{
                     rij = sqrt(dx*dx + dy*dy);
                     for(vi=0;vi<Cells[ci].NV;vi++){
                         for(vj=0;vj<Cells[cj].NV;vj++){
-                            sij = sqrt(Cells[ci].a0) + sqrt(Cells[cj].a0);
+                            sij = sqrt(M_PI)*Cells[ci].radii[vi] + sqrt(M_PI)*Cells[cj].radii[vj];
                             xij = rij/sij;
                             ftmp = 0.0;
                             if(overlaps[vi]){
