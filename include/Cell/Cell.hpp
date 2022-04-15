@@ -51,11 +51,13 @@ namespace DPM {
             void UpdateDirectorDiffusion(double dt);
             void UpdateDirectorPsi(double newpsi);
             void SetCalA0(double newCalA0);
+            void ChangePrefferedSize(double scale);
             double GetPerim();
             double GetArea();
             double GetCenterX();
             double GetCenterY();
             double GetShapeParam();
             bool isConvex();
+            bool PointInside(double x, double y);
     };
 }
