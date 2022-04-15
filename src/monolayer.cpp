@@ -416,10 +416,15 @@ namespace DPM{
         }
 
         if(pinning){
+            bool inside;
+            double nearestx, nearesty;
             for(ci=0;ci<NCELLS;ci++){
                 for(vi=0;vi<Cells[ci].NV;vi++){
-                    dx = Cells[ci].X[vi] - Cells[Cells[ci].NearestCellIdx[vi]].X[Cells[ci].NearestVertexIdx[vi]];
-                    dy = Cells[ci].Y[vi] - Cells[Cells[ci].NearestCellIdx[vi]].Y[Cells[ci].NearestVertexIdx[vi]];
+                    nearestx = Cells[Cells[ci].NearestCellIdx[vi]].X[Cells[ci].NearestVertexIdx[vi]];
+                    nearesty = Cells[Cells[ci].NearestCellIdx[vi]].Y[Cells[ci].NearestVertexIdx[vi]];
+                    inside = Cells[ci].PointInside(nearestx,nearesty);
+                    dx = Cells[ci].X[vi] - nearestx;
+                    dy = Cells[ci].Y[vi] - nearesty;
                     dx -= L*round(dx/L);
                     dy -= L*round(dx/L);
                     // rij here referes to vertex vertex distance
@@ -430,7 +435,22 @@ namespace DPM{
                     sij = sqrt(Cells[ci].a0);
                     xij = rij/sij;
                     ftmp = Kc*(1.0-xij)/(sij);
-                    if(rij < Cells[ci].r0/20){
+                    if(inside){
+                        dx = nearestx - Cells[ci].GetCenterX();
+                        dy = nearesty - Cells[ci].GetCenterY();
+                        dx -= L*round(dx/L);
+                        dy -= L*round(dx/L);
+                        rij = sqrt(dx*dx + dy*dy);
+                        if(rij < 0.0){
+                            rij *= -1;
+                        }
+                        sij = sqrt(Cells[ci].a0);
+                        xij = rij/sij;
+                        ftmp = Kc*(1.0-xij)/(sij);
+                        Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
+                        Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
+                    }
+                    else if(rij < Cells[ci].r0*Cells[ci].l1[vi]){
                         Cells[ci].Fx[vi] -= ftmp * (dx/rij);
                         Cells[ci].Fy[vi] -= ftmp * (dy/rij);
                         Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
