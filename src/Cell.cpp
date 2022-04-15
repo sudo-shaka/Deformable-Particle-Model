@@ -310,7 +310,6 @@ namespace DPM{
     bool Cell::PointInside(double x, double y){
         int nPos=0, nNeg=0, vi; 
         double test;
-        bool inside;
         if(isConvex()){
             //use inclusion test: is the point always to the right of the left of vector segements?
             for(vi=0;vi<NV;vi++){
@@ -328,7 +327,7 @@ namespace DPM{
         }
         else{
             //use crossing test: If you draw a line out from point, does it cross an odd number of times?
-            int i, j;
+            int i, j; bool inside = false;
             for (i = 0, j = NV-1; i < NV; j = i++) {
                 if ( ((Y[i]>y) != (Y[j]>y)) &&
                 (x < (X[j]-X[i]) * (y-Y[i]) / (Y[j]-Y[i]) + X[i]) ) {
