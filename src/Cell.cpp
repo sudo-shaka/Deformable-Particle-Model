@@ -306,4 +306,42 @@ namespace DPM{
         }
         return true;
     }
+
+    bool Cell::PointInside(double x, double y){
+        int nPos=0, nNeg=0, vi; 
+        double test;
+        bool inside;
+        if(isConvex()){
+            //use inclusion test: is the point always to the right of the left of vector segements?
+            for(vi=0;vi<NV;vi++){
+                //D = (x2 - x1) * (yp - y1) - (xp - x1) * (y2 - y1)
+                test = (X[ip1[vi]] - X[vi]) * (y - Y[vi]) - (x - X[vi]) * (Y[ip1[vi]] - Y[vi]);
+                if(test < 0)
+                    nNeg++;
+                else
+                    nPos++;
+            }
+            if(nNeg == 0 || nPos == 0)
+                return true;
+            else
+                return false;
+        }
+        else{
+            //use crossing test: If you draw a line out from point, does it cross an odd number of times?
+            int i, j;
+            for (i = 0, j = NV-1; i < NV; j = i++) {
+                if ( ((Y[i]>y) != (Y[j]>y)) &&
+                (x < (X[j]-X[i]) * (y-Y[i]) / (Y[j]-Y[i]) + X[i]) ) {
+                    inside = !inside;
+                }
+            }
+            return inside;
+        }
+    }
+
+    void Cell::ChangePrefferedSize(double scale){
+        a0 *= scale;
+        r0 = sqrt((2.0*a0)/(NV*sin((2.0*M_PI)/NV)));
+        l0 = 2.0*sqrt(M_PI*calA0*a0)/NV;
+    }
 }

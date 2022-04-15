@@ -49,11 +49,12 @@ void init_Cell(py::module &m){
     .def("UpdateVV",py::overload_cast<int,double>(&DPM::Cell::UpdateVV),py::arg("nsteps"),py::arg("dt"))
     .def("UpdateDirectorDiffusion",py::overload_cast<double>(&DPM::Cell::UpdateDirectorDiffusion),py::arg("dt"))
     .def("SetCalA0",py::overload_cast<double>(&DPM::Cell::SetCalA0),py::arg("calA0"))
+    .def("SetPerfferedSize",py::overload_cast<double>(&DPM::Cell::ChangePrefferedSize),py::arg("scale"))
     .def("GetPerim", &DPM::Cell::GetPerim)
     .def("GetArea",&DPM::Cell::GetArea)
     .def("GetCenterX",&DPM::Cell::GetCenterX)
     .def("GetCenterY",&DPM::Cell::GetCenterY)
     .def("GetShapeParameter", &DPM::Cell::GetShapeParam)
     .def("isConvex",&DPM::Cell::isConvex)
-;
+    ;
 }
