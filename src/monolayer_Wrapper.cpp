@@ -31,6 +31,7 @@ void init_monolayer(py::module &m){
     .def("AttractiveForceUpdate",&DPM::monolayer::AttactiveForces)
     .def("RetractingForceUpdate",&DPM::monolayer::RetractingForceUpdate)
     .def("MixedInteractingForceUpdate",py::overload_cast<std::vector<bool>, std::function<void()>, std::function<void()>>(&DPM::monolayer::MixedInteractingMethods))
+    .def("DrivingForceUpdate",&DPM::monolayer::DrivingForceUpdate)
     .def("UpdateDirectorDiffusion",py::overload_cast<double>(&DPM::monolayer::UpdateDirectorDiffusion),py::arg("dt"))
     .def("UpdateDirectorVicsek",py::overload_cast<double, double>(&DPM::monolayer::UpdateDirectorVicsek),py::arg("eta"),py::arg("InteractingRadius"))
     .def("UpdateNearestNeighbors",&DPM::monolayer::NearestNeighborUpdate)

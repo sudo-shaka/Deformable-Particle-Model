@@ -33,6 +33,7 @@ namespace DPM{
             void MixedInteractingMethods(std::vector<bool> firstMethod,std::function<void()> Method1, std::function<void()> Method2);
             void ShapeForceUpdate();
             void ResetForces();
+            void DrivingForceUpdate();
             void UpdateDirectorDiffusion(double dt);
             void UpdateDirectorVicsek(double eta, double InteractingRadius);
             void CellDivision(int cellidx);

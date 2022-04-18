@@ -312,6 +312,12 @@ namespace DPM{
         }
     }
 
+    void monolayer::DrivingForceUpdate(){
+        for(int ci=0;ci<NCELLS){
+            Cells[ci].DrivingForceUpdate();
+        }
+    }
+
     void monolayer::UpdateDirectorDiffusion(double dt){
         for(int ci=0;ci<NCELLS;ci++){
             Cells[ci].UpdateDirectorDiffusion(dt);
