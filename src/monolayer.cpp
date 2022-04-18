@@ -239,7 +239,7 @@ namespace DPM{
                 dx = Cells[ci].X[vi] - nearestx;
                 dy = Cells[ci].Y[vi] - nearesty;
                 dx -= L*round(dx/L);
-                dy -= L*round(dx/L);
+                dy -= L*round(dy/L);
                 // rij here referes to vertex vertex distance
                 rij = sqrt(dx*dx + dy*dy);
                 if(rij < 0.0){
@@ -309,6 +309,37 @@ namespace DPM{
                 Cells[ci].vx[vi] = 0.0;
                 Cells[ci].vy[vi] = 0.0;
             }
+        }
+    }
+
+    void monolayer::UpdateDirectorDiffusion(double dt){
+        for(int ci=0;ci<NCELLS;ci++){
+            Cells[ci].UpdateDirectorDiffusion(dt);
+        }
+    }
+
+    void monolayer::UpdateDirectorVicsek(double eta, double InteractingRadius){
+        double dx, dy, dpsi=0.0, noise;
+        int nearcount = 0;
+        for(int ci=0;ci<NCELLS;ci++){
+            for(int cj=0;cj<NCELLS;cj++){
+                if(ci != cj){
+                    dx = Cells[ci].GetCenterX() - Cells[cj].GetCenterX();
+                    dy = Cells[ci].GetCenterY() - Cells[cj].GetCenterY();
+                    dx -= L*round(dx/L);
+                    dy -= L*round(dy/L);
+                    if(dx*dx + dy*dy < InteractingRadius){
+                        dpsi += Cells[cj].psi;
+                        nearcount++;
+                    }
+                }
+            }
+            if(nearcount > 0){
+                dpsi /= (double)nearcount;
+                noise = M_PI*eta*(rand()-0.5);
+                dpsi += noise;
+            }
+            Cells[ci].psi = dpsi;
         }
     }
 
