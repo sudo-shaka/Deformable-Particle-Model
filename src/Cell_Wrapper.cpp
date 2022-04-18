@@ -22,6 +22,7 @@ void init_Cell(py::module &m){
     )
     .def(py::init<int>(),py::arg("NV"))
     .def_readonly("NV",&DPM::Cell::NV)
+    .def_readonly("CalA0",&DPM::Cell::calA0)
     .def_readwrite("v0",&DPM::Cell::v0)
     .def_readwrite("Ds",&DPM::Cell::Dr)
     .def_readwrite("Dr",&DPM::Cell::Ds)

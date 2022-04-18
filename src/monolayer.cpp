@@ -286,7 +286,7 @@ namespace DPM{
             std::cout << "(!) Warning: Index list is smaller than the number of cells" << std::endl;
         }
 
-        for(int ci=0;ci<N;ci++){
+        for(int ci=1;ci<N;ci++){
             cellidx = ci-1;
             NCELLS = ci;
             if(UseMethod1[ci]){
