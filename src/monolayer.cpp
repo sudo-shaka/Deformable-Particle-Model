@@ -313,7 +313,7 @@ namespace DPM{
     }
 
     void monolayer::DrivingForceUpdate(){
-        for(int ci=0;ci<NCELLS){
+        for(int ci=0;ci<NCELLS;ci++){
             Cells[ci].DrivingForceUpdate();
         }
     }
