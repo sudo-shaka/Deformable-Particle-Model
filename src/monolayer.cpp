@@ -186,6 +186,37 @@ namespace DPM{
         }
     }
 
+    void monolayer::RetractingForceUpdate(){
+        int ci,cj,vi;
+        double cxi,cyi,dx,dy,xij,sij,rij;
+        double ftmp;
+        for(ci=cellidx;ci<NCELLS;ci++){
+            cxi = Cells[ci].GetCenterX();
+            cyi = Cells[ci].GetCenterY();
+            sij = Cells[ci].a0;
+            for(cj=0;cj<(int)Cells.size();cj++){
+                if(ci!=cj){
+                    FindOverlaps(ci,cj);
+                    for(vi=0;vi<Cells[ci].NV;vi++){
+                        dx = Cells[ci].X[vi] - cxi;
+                        dy = Cells[ci].Y[vi] - cyi;
+                        rij = sqrt(dx*dx + dy*dy);
+                        xij = rij/sij;
+                        ftmp = 0.0;
+                        if(overlaps[vi]){
+                            //if overlapping retract point back towards the center
+                            ftmp = Kc*(1-xij)/(sij);
+                            U += 0.5*Kc * pow(1-xij,2);
+                        }
+                        //force update
+                        Cells[ci].Fx[vi] -= ftmp * (dx/rij);
+                        Cells[ci].Fy[vi] -= ftmp * (dy/rij);
+                    }
+                }
+            }
+        }
+    }
+
     void monolayer::PinnedForces(){
         int ci,vi;
         double dx, dy, sij, rij ,xij, ftmp;

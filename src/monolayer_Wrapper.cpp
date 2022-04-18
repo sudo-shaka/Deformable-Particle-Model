@@ -29,6 +29,7 @@ void init_monolayer(py::module &m){
     .def("CellDivide",py::overload_cast<int>(&DPM::monolayer::CellDivision),py::arg("CellIdx"))
     .def("RepulsiveForceUpdate",&DPM::monolayer::RepulsiveForces)
     .def("AttractiveForceUpdate",&DPM::monolayer::AttactiveForces)
+    .def("RetractingForceUpdate",&DPM::monolayer::RetractingForceUpdate)
     .def("MixedInteractingForceUpdate",py::overload_cast<std::vector<bool>, std::function<void()>, std::function<void()>>(&DPM::monolayer::MixedInteractingMethods))
     .def("UpdateNearestNeighbors",&DPM::monolayer::NearestNeighborUpdate)
     .def("PinnedForceUpdate",&DPM::monolayer::PinnedForces)
