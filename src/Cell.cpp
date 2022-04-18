@@ -139,7 +139,7 @@ namespace DPM{
         }
     }
 
-    void Cell::DrivingForceUpdate(double dt){
+    void Cell::DrivingForceUpdate(){
         if(v0 == 0.0){
             return;
         }
@@ -174,7 +174,7 @@ namespace DPM{
         int i, step;
         for(step=0;step<nsteps;step++){
             UpdateShapeForces();
-            DrivingForceUpdate(dt);
+            DrivingForceUpdate();
             for(i=0; i<NV; i++){
                 X[i] += Fx[i]*dt;
                 Y[i] += Fy[i]*dt;

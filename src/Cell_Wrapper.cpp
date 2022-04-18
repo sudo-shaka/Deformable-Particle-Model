@@ -43,7 +43,7 @@ void init_Cell(py::module &m){
     .def("PerimeterForceUpdate",&DPM::Cell::PerimeterForceUpdate)
     .def("AreaForceUpdate", &DPM::Cell::AreaForceUpdate)
     .def("BendingForceUpdate",&DPM::Cell::BendingForceUpdate)
-    .def("DrivingForceUpdate",py::overload_cast<double>(&DPM::Cell::DrivingForceUpdate),py::arg("dt"))
+    .def("DrivingForceUpdate",&DPM::Cell::DrivingForceUpdate)
     .def("UpdateShapeForces",&DPM::Cell::UpdateShapeForces)
     .def("UpdateEuler",py::overload_cast<int,double>(&DPM::Cell::UpdateEuler),py::arg("nsteps"),py::arg("dt"))
     .def("UpdateVV",py::overload_cast<int,double>(&DPM::Cell::UpdateVV),py::arg("nsteps"),py::arg("dt"))

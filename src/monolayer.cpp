@@ -504,7 +504,7 @@ namespace DPM{
             //For all the cells update the forces based on intracellular shapes
             for(ci=0;ci<NCELLS;ci++){
                 Cells[ci].UpdateShapeForces();
-                Cells[ci].DrivingForceUpdate(dt);
+                Cells[ci].DrivingForceUpdate();
             }
             //now update the forces they have on eachother
             InteractingFunction();
