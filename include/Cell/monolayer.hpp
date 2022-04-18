@@ -28,6 +28,7 @@ namespace DPM{
             void FindOverlaps(int ci, int cj);
             void RepulsiveForces();
             void AttactiveForces();
+            void RetractingForceUpdate();
             void PinnedForces();
             void MixedInteractingMethods(std::vector<bool> firstMethod,std::function<void()> Method1, std::function<void()> Method2);
             void ShapeForceUpdate();
