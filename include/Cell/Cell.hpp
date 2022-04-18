@@ -44,7 +44,7 @@ namespace DPM {
             void PerimeterForceUpdate();
             void AreaForceUpdate();
             void BendingForceUpdate();
-            void DrivingForceUpdate(double dt);
+            void DrivingForceUpdate();
             void UpdateShapeForces();
             void UpdateEuler(int nsteps,double dt);
             void UpdateVV(int nsteps, double dt);
