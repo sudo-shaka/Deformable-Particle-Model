@@ -20,6 +20,7 @@ namespace DPM{
         U = 0.0;
     }
     void monolayer::disperse(){
+        //Randomly distributes cells as spheres
         std::vector<double> X,Y,Fx,Fy;
         X.resize(NCELLS);Y.resize(NCELLS);
         Fx.resize(NCELLS); Fy.resize(NCELLS);
@@ -96,6 +97,7 @@ namespace DPM{
     }
 
     void monolayer::RepulsiveForces(){
+        //Repells verticies from eachother if overlapping with respect to the overlapping verticies
         int ci, cj,vi, vj;
         double dx,dy, cxi,cyi, cxj,cyj, rij, sij, xij, ftmp;
         for(ci=cellidx;ci<NCELLS;ci++){
@@ -136,6 +138,7 @@ namespace DPM{
     }
 
     void monolayer::AttactiveForces(){
+        // Repells if overlapping, but if not and within range, the particles attract with respect to the interacting vertex
         int ci,cj,vi,vj;
         double cxi,cyi,cxj,cyj,dx,dy,sij,rij;
         double shellij,cutij,xij,kint,ftmp;
@@ -187,6 +190,7 @@ namespace DPM{
     }
 
     void monolayer::RetractingForceUpdate(){
+        // If overlapping, the vertex moves away from the other cell by retracting to its own center of mass
         int ci,cj,vi;
         double cxi,cyi,dx,dy,xij,sij,rij;
         double ftmp;
@@ -218,6 +222,11 @@ namespace DPM{
     }
 
     void monolayer::PinnedForces(){
+        /*Required an updated nearest neightbor index.
+        based on the nearest neightbor intext, the vertecies are attracted to it's nearest neighbor.
+        It stays attracted to that particle (within a certain distance for all timesteps). 
+        This makes it so verticies stick to eachother*/
+        
         int ci,vi;
         double dx, dy, sij, rij ,xij, ftmp;
         bool inside;
@@ -265,6 +274,8 @@ namespace DPM{
     }
 
     void monolayer::MixedInteractingMethods(std::vector<bool> UseMethod1, std::function<void()> Method1, std::function<void()> Method2){
+        //This function allows for specific interacting methods to be applied for a given cell in the monolayer
+        // You can choose which methods, and the UseMethod vector of booleans decides the type of interacting update to use for that cell
         int N = UseMethod1.size();
         long unsigned int nCellsTmp = Cells.size();
         if(UseMethod1.size() > nCellsTmp){
@@ -337,6 +348,7 @@ namespace DPM{
     }
 
     void monolayer::VertexFIRE(std::function<void()> InteractingFunction, double alpha0, double dt, int itmax, double Ftol){
+        //Minimize the forces based on an interacting function and the cell shape forces
         int ci,vi,i,NDELAY = 20;
         double P, fnorm, fcheck, vnorm, alpha, dtmax, dtmin;
         int npPos, npNeg, fireit;
@@ -485,6 +497,7 @@ namespace DPM{
         }
     }
     void monolayer::UpdateEuler(std::function<void()> InteractingFunction,int nsteps, double dt){
+        //Update for a given number of timesteps and protocol (Does not work for the mixed method)
         int ci, vi;
         for(int step=0;step<nsteps;step++){
             ResetForces();
@@ -508,6 +521,7 @@ namespace DPM{
     }
 
     void monolayer::UpdateEuler(double dt){
+        //Simply change the positions based on the current forces
         int ci, vi; 
         for(ci=0;ci<NCELLS;ci++){
             for(vi=0;vi<Cells[ci].NV;vi++){
@@ -521,6 +535,7 @@ namespace DPM{
     }
 
     void monolayer::UpdateVV(std::function<void()> InteractingFunction,int nsteps, double dt){
+       //Although avialable, I do not recomend using this method as cell motion is overdapmed and does not have a large inertial component
       std::vector<double> oldFx;
       std::vector<double> oldFy;
       int ci, vi,step;
