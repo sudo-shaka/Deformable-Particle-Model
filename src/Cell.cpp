@@ -134,8 +134,8 @@ namespace DPM{
         }
 
         for(i=0;i<NV;i++){
-            Fx[i] += 0.1*fb*(2.0*six[i] - six[im1[i]] - six[ip1[i]]);
-            Fy[i] += 0.1*fb*(2.0*siy[i] - siy[im1[i]] - siy[ip1[i]]);
+            Fx[i] += fb*(2.0*six[i] - six[im1[i]] - six[ip1[i]]);
+            Fy[i] += fb*(2.0*siy[i] - siy[im1[i]] - siy[ip1[i]]);
         }
     }
 
