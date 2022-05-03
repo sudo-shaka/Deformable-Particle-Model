@@ -2,7 +2,6 @@
 #include <monolayer.hpp>
 #include <vector>
 #include <iostream>
-#define CALL_MEMBER_FN(object, ptrToMember) ((object).*(ptrToMember))
 
 namespace DPM{
     monolayer::monolayer(std::vector<DPM::Cell> inputCells, double phi0input){
