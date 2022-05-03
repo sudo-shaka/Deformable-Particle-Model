@@ -1,5 +1,3 @@
-#This code runs the example seen in the README
-from platform import platform
 try:
   import DPM
   from matplotlib import pyplot as plt
