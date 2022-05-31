@@ -161,10 +161,6 @@ namespace DPM{
     }
 
     void Cell::UpdateShapeForces(){
-        for(int i=0;i<NV;i++){
-            Fx[i] = 0.0;
-            Fy[i] = 0.0;
-        }
         AreaForceUpdate();
         PerimeterForceUpdate();
         BendingForceUpdate();
@@ -197,7 +193,7 @@ namespace DPM{
             X[i] += dt*vx[i] + 0.5*dt*dt*(Fx[i]);
             Y[i] += dt*vy[i] + 0.5*dt*dt*(Fy[i]);
         }
-
+        ResetForces();
         UpdateShapeForces();
 
         for(i=0;i<NV;i++){

@@ -1,7 +1,9 @@
 #include <cmath>
 #include <monolayer.hpp>
 #include <vector>
+#include <thread>
 #include <iostream>
+#include <string>
 
 namespace DPM{
     monolayer::monolayer(std::vector<DPM::Cell> inputCells, double phi0input){
@@ -17,6 +19,8 @@ namespace DPM{
         L = sqrt(sumareas)/phi0;
         Kc = 1.0;
         U = 0.0;
+        InteractingMethodNum = 0;
+        InteractingMethod = "Repulsive";
     }
     void monolayer::disperse(){
         //Randomly distributes cells as spheres
@@ -89,157 +93,197 @@ namespace DPM{
         }
     }
 
+    void monolayer::SetInteractingMethod(std::string methodtype){
+        if(methodtype.compare(std::string("Repulsive")) == 0){
+            InteractingMethodNum = 0;
+            InteractingMethod = methodtype;
+        }
+        else if(methodtype.compare(std::string("Attractive")) == 0){
+            InteractingMethodNum = 1;
+            InteractingMethod = methodtype;
+        }
+        else if(methodtype.compare(std::string("Retractive")) == 0){
+            InteractingMethodNum = 2;
+            InteractingMethod = methodtype;
+        }
+        else if(methodtype.compare(std::string("Pinned")) == 0){
+            InteractingMethodNum = 3;
+            InteractingMethod = methodtype;
+        }
+        else{
+            std::cerr << "Not a valid interacting method, please use: \n";
+            std::cout << "      - Repuslive" << std::endl;
+            std::cout << "      - Attractive" << std::endl;
+            std::cout << "      - Retractive" << std::endl;
+            std::cout << "      - Pinned" << std::endl;
+            std::cout << "\nDefaulting to : " << InteractingMethod << std::endl;
+        }
+    }
+
     void monolayer::ShapeForceUpdate(){
+        std::vector<std::thread> threads;
         for(int ci=0; ci<NCELLS;ci++){
-            Cells[ci].UpdateShapeForces();
+            threads.push_back(std::thread(&DPM::Cell::UpdateShapeForces,&this->Cells[ci]));
+        }
+        for(auto& th : threads){
+            th.join();
         }
     }
 
-    void monolayer::RepulsiveForces(){
+    void monolayer::RepulsiveForces(int ci){
         //Repells verticies from eachother if overlapping with respect to the overlapping verticies
-        int ci, cj,vi, vj;
+        int cj,vi, vj;
         double dx,dy, cxi,cyi, cxj,cyj, rij, sij, xij, ftmp;
-        for(ci=cellidx;ci<NCELLS;ci++){
-            cxi = Cells[ci].GetCenterX();
-            cyi = Cells[ci].GetCenterY();
-            Cells[ci].FindRadii();
-            for(cj=0;cj<(int)Cells.size();cj++){
-                if(ci!=cj){
-                    FindOverlaps(ci,cj);
-                    Cells[cj].FindRadii();
-                    cxj = Cells[cj].GetCenterX();
-                    cyj = Cells[cj].GetCenterY();
-                    dx = cxj-cxi;
-                    dx -= L*round(dx/L);
-                    dy  = cyj-cyi;
-                    dy -= L*round(dy/L);
-                    rij = sqrt(dx*dx + dy*dy);
-                    for(vi=0;vi<Cells[ci].NV;vi++){
-                        for(vj=0;vj<Cells[cj].NV;vj++){
-                            sij = sqrt(M_PI)*Cells[ci].radii[vi] + sqrt(M_PI)*Cells[cj].radii[vj];
-                            xij = rij/sij;
-                            ftmp = 0.0;
-                            if(overlaps[vi]){
-                                //if overlapping repell the particles away from eachothers centers
-                                ftmp = Kc*(1-xij)/(sqrt(Cells[ci].a0)/sij);
-                                U += 0.5*Kc * pow(1-xij,2);
-                            }
-                            //force update
-                            Cells[ci].Fx[vi] -= ftmp * (dx/rij);
-                            Cells[ci].Fy[vi] -= ftmp * (dy/rij);
-                            Cells[cj].Fx[vj] += ftmp * (dx/rij);
-                            Cells[cj].Fy[vj] += ftmp * (dy/rij);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    void monolayer::AttactiveForces(){
-        // Repells if overlapping, but if not and within range, the particles attract with respect to the interacting vertex
-        int ci,cj,vi,vj;
-        double cxi,cyi,cxj,cyj,dx,dy,sij,rij;
-        double shellij,cutij,xij,kint,ftmp;
-        for(ci=cellidx;ci<NCELLS;ci++){
-            cxi = Cells[ci].GetCenterX();
-            cyi = Cells[ci].GetCenterY();
-            Cells[ci].FindRadii();
-            for(cj=0;cj<(int)Cells.size();cj++){
-                if(ci!=cj){
-                    FindOverlaps(ci,cj);
-                    Cells[cj].FindRadii();
-                    cxj = Cells[cj].GetCenterX();
-                    cyj = Cells[cj].GetCenterY();
-                    dx = cxj-cxi;
-                    dx -= L*round(dx/L);
-                    dy  = cyj-cyi;
-                    dy -= L*round(dy/L);
-                    rij = sqrt(dx*dx + dy*dy);
-                    for(vi=0;vi<Cells[ci].NV;vi++){
-                        for(vj=0;vj<Cells[cj].NV;vj++){
-                            sij = sqrt(M_PI)*Cells[ci].radii[vi] + sqrt(M_PI)*Cells[cj].radii[vj];
-                            xij = rij/sij;
-                            ftmp = 0.0;
-                            if(overlaps[vi]){
-                                //if overlapping repell the particles away from eachothers centers
-                                ftmp = Kc*(1-xij)/(sqrt(Cells[ci].a0)/sij);
-                                U += 0.5*Kc * pow(1-xij,2);
-                            }
-                            else{
-                                shellij = (1.0+Cells[ci].l2[vi])*sij;
-                                cutij = (1.0+Cells[ci].l1[vi])*sij;
-                                //if not overlapping, see if they are within attractive distance
-                                if(rij >= cutij && rij <= shellij){
-                                    kint = (Kc*Cells[ci].l1[vi])/(Cells[ci].l2[vi]-Cells[ci].l1[vi]);
-                                    ftmp = kint * (xij - (1.0 - Cells[ci].l2[vi]))/sij;
-                                    U += -0.5*kint*pow(1.0 + Cells[ci].l2[vi] - xij,2.0);
-                                }
-                            }
-                            //force update
-                            Cells[ci].Fx[vi] -= ftmp * (dx/rij);
-                            Cells[ci].Fy[vi] -= ftmp * (dy/rij);
-                            Cells[cj].Fx[vj] += ftmp * (dx/rij);
-                            Cells[cj].Fy[vj] += ftmp * (dy/rij);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    void monolayer::RetractingForceUpdate(){
-        // If overlapping, the vertex moves away from the other cell by retracting to its own center of mass
-        int ci,cj,vi;
-        double cxi,cyi,dx,dy,xij,sij,rij;
-        double ftmp;
-        for(ci=cellidx;ci<NCELLS;ci++){
-            cxi = Cells[ci].GetCenterX();
-            cyi = Cells[ci].GetCenterY();
-            sij = Cells[ci].a0;
-            for(cj=0;cj<(int)Cells.size();cj++){
-                if(ci!=cj){
-                    FindOverlaps(ci,cj);
-                    for(vi=0;vi<Cells[ci].NV;vi++){
-                        dx = Cells[ci].X[vi] - cxi;
-                        dy = Cells[ci].Y[vi] - cyi;
-                        rij = sqrt(dx*dx + dy*dy);
+        std::vector<bool> overlaps; overlaps.resize(Cells[ci].NV);
+        cxi = Cells[ci].GetCenterX();
+        cyi = Cells[ci].GetCenterY();
+        Cells[ci].FindRadii();
+        for(cj=0;cj<(int)Cells.size();cj++){
+            if(ci!=cj){
+                overlaps = FindOverlaps(ci,cj);
+                Cells[cj].FindRadii();
+                cxj = Cells[cj].GetCenterX();
+                cyj = Cells[cj].GetCenterY();
+                dx = cxj-cxi;
+                dx -= L*round(dx/L);
+                dy  = cyj-cyi;
+                dy -= L*round(dy/L);
+                rij = sqrt(dx*dx + dy*dy);
+                for(vi=0;vi<Cells[ci].NV;vi++){
+                    for(vj=0;vj<Cells[cj].NV;vj++){
+                        sij = sqrt(M_PI)*Cells[ci].radii[vi] + sqrt(M_PI)*Cells[cj].radii[vj];
                         xij = rij/sij;
                         ftmp = 0.0;
                         if(overlaps[vi]){
-                            //if overlapping retract point back towards the center
-                            ftmp = Kc*(1-xij)/(sij);
+                            //if overlapping repell the particles away from eachothers centers
+                            ftmp = Kc*(1-xij)/(sqrt(Cells[ci].a0)/sij);
                             U += 0.5*Kc * pow(1-xij,2);
                         }
                         //force update
                         Cells[ci].Fx[vi] -= ftmp * (dx/rij);
                         Cells[ci].Fy[vi] -= ftmp * (dy/rij);
+                        Cells[cj].Fx[vj] += ftmp * (dx/rij);
+                        Cells[cj].Fy[vj] += ftmp * (dy/rij);
                     }
                 }
             }
         }
     }
 
-    void monolayer::PinnedForces(){
+    void monolayer::AttractiveForces(int ci){
+        // Repells if overlapping, but if not and within range, the particles attract with respect to the interacting vertex
+        int cj,vi,vj;
+        double cxi,cyi,cxj,cyj,dx,dy,sij,rij;
+        double shellij,cutij,xij,kint,ftmp;
+        std::vector<bool> overlaps; overlaps.resize(Cells[ci].NV);
+        cxi = Cells[ci].GetCenterX();
+        cyi = Cells[ci].GetCenterY();
+        Cells[ci].FindRadii();
+        for(cj=0;cj<(int)Cells.size();cj++){
+            if(ci!=cj){
+                overlaps = FindOverlaps(ci,cj);
+                Cells[cj].FindRadii();
+                cxj = Cells[cj].GetCenterX();
+                cyj = Cells[cj].GetCenterY();
+                dx = cxj-cxi;
+                dx -= L*round(dx/L);
+                dy  = cyj-cyi;
+                dy -= L*round(dy/L);
+                rij = sqrt(dx*dx + dy*dy);
+                for(vi=0;vi<Cells[ci].NV;vi++){
+                    for(vj=0;vj<Cells[cj].NV;vj++){
+                        sij = sqrt(M_PI)*Cells[ci].radii[vi] + sqrt(M_PI)*Cells[cj].radii[vj];
+                        xij = rij/sij;
+                        ftmp = 0.0;
+                        if(overlaps[vi]){
+                            //if overlapping repell the particles away from eachothers centers
+                            ftmp = Kc*(1-xij)/(sqrt(Cells[ci].a0)/sij);
+                            U += 0.5*Kc * pow(1-xij,2);
+                        }
+                        else{
+                            shellij = (1.0+Cells[ci].l2[vi])*sij;
+                            cutij = (1.0+Cells[ci].l1[vi])*sij;
+                            //if not overlapping, see if they are within attractive distance
+                            if(rij >= cutij && rij <= shellij){
+                                kint = (Kc*Cells[ci].l1[vi])/(Cells[ci].l2[vi]-Cells[ci].l1[vi]);
+                                ftmp = kint * (xij - (1.0 - Cells[ci].l2[vi]))/sij;
+                                U += -0.5*kint*pow(1.0 + Cells[ci].l2[vi] - xij,2.0);
+                            }
+                        }
+                        //force update
+                        Cells[ci].Fx[vi] -= ftmp * (dx/rij);
+                        Cells[ci].Fy[vi] -= ftmp * (dy/rij);
+                        Cells[cj].Fx[vj] += ftmp * (dx/rij);
+                        Cells[cj].Fy[vj] += ftmp * (dy/rij);
+                    }
+                }
+            }
+        }
+        
+    }
+
+    void monolayer::RetractingForceUpdate(int ci){
+        // If overlapping, the vertex moves away from the other cell by retracting to its own center of mass
+        int cj,vi;
+        double cxi,cyi,dx,dy,xij,sij,rij;
+        double ftmp;
+        std::vector<bool> overlaps; overlaps.resize(Cells[ci].NV);
+        cxi = Cells[ci].GetCenterX();
+        cyi = Cells[ci].GetCenterY();
+        sij = Cells[ci].a0;
+        for(cj=0;cj<(int)Cells.size();cj++){
+            if(ci!=cj){
+                overlaps = FindOverlaps(ci,cj);
+                for(vi=0;vi<Cells[ci].NV;vi++){
+                    dx = Cells[ci].X[vi] - cxi;
+                    dy = Cells[ci].Y[vi] - cyi;
+                    rij = sqrt(dx*dx + dy*dy);
+                    xij = rij/sij;
+                    ftmp = 0.0;
+                    if(overlaps[vi]){
+                        //if overlapping retract point back towards the center
+                        ftmp = Kc*(1-xij)/(sij);
+                        U += 0.5*Kc * pow(1-xij,2);
+                    }
+                    //force update
+                    Cells[ci].Fx[vi] -= ftmp * (dx/rij);
+                    Cells[ci].Fy[vi] -= ftmp * (dy/rij);
+                }
+            }
+        }
+    }
+
+    void monolayer::PinnedForces(int ci){
         /*Required an updated nearest neightbor index.
         based on the nearest neightbor intext, the vertecies are attracted to it's nearest neighbor.
         It stays attracted to that particle (within a certain distance for all timesteps). 
         This makes it so verticies stick to eachother*/
         
-        int ci,vi;
+        int vi;
         double dx, dy, sij, rij ,xij, ftmp;
         bool inside;
         double nearestx, nearesty;
-        for(ci=cellidx;ci<NCELLS;ci++){
-            for(vi=0;vi<Cells[ci].NV;vi++){
-                nearestx = Cells[Cells[ci].NearestCellIdx[vi]].X[Cells[ci].NearestVertexIdx[vi]];
-                nearesty = Cells[Cells[ci].NearestCellIdx[vi]].Y[Cells[ci].NearestVertexIdx[vi]];
-                inside = Cells[ci].PointInside(nearestx,nearesty);
-                dx = Cells[ci].X[vi] - nearestx;
-                dy = Cells[ci].Y[vi] - nearesty;
+        for(vi=0;vi<Cells[ci].NV;vi++){
+            nearestx = Cells[Cells[ci].NearestCellIdx[vi]].X[Cells[ci].NearestVertexIdx[vi]];
+            nearesty = Cells[Cells[ci].NearestCellIdx[vi]].Y[Cells[ci].NearestVertexIdx[vi]];
+            inside = Cells[ci].PointInside(nearestx,nearesty);
+            dx = Cells[ci].X[vi] - nearestx;
+            dy = Cells[ci].Y[vi] - nearesty;
+            dx -= L*round(dx/L);
+            dy -= L*round(dy/L);
+            // rij here referes to vertex vertex distance
+            rij = sqrt(dx*dx + dy*dy);
+            if(rij < 0.0){
+                rij *= -1;
+            }
+            sij = sqrt(Cells[ci].a0);
+            xij = rij/sij;
+            ftmp = Kc*(1.0-xij)/(sij);
+            if(inside){
+                dx = nearestx - Cells[ci].GetCenterX();
+                dy = nearesty - Cells[ci].GetCenterY();
                 dx -= L*round(dx/L);
-                dy -= L*round(dy/L);
-                // rij here referes to vertex vertex distance
+                dy -= L*round(dx/L);
                 rij = sqrt(dx*dx + dy*dy);
                 if(rij < 0.0){
                     rij *= -1;
@@ -247,56 +291,16 @@ namespace DPM{
                 sij = sqrt(Cells[ci].a0);
                 xij = rij/sij;
                 ftmp = Kc*(1.0-xij)/(sij);
-                if(inside){
-                    dx = nearestx - Cells[ci].GetCenterX();
-                    dy = nearesty - Cells[ci].GetCenterY();
-                    dx -= L*round(dx/L);
-                    dy -= L*round(dx/L);
-                    rij = sqrt(dx*dx + dy*dy);
-                    if(rij < 0.0){
-                        rij *= -1;
-                    }
-                    sij = sqrt(Cells[ci].a0);
-                    xij = rij/sij;
-                    ftmp = Kc*(1.0-xij)/(sij);
-                    Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
-                    Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
-                }
-                else if(rij < Cells[ci].r0*Cells[ci].l1[vi]){
-                    Cells[ci].Fx[vi] -= ftmp * (dx/rij);
-                    Cells[ci].Fy[vi] -= ftmp * (dy/rij);
-                    Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
-                    Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
-                }
+                Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
+                Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
+            }
+            else if(rij < Cells[ci].r0*Cells[ci].l1[vi]){
+                Cells[ci].Fx[vi] -= ftmp * (dx/rij);
+                Cells[ci].Fy[vi] -= ftmp * (dy/rij);
+                Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
+                Cells[Cells[ci].NearestCellIdx[vi]].Fx[Cells[ci].NearestVertexIdx[vi]] += ftmp *(dx/rij);
             }
         }
-    }
-
-    void monolayer::MixedInteractingMethods(std::vector<bool> UseMethod1, std::function<void()> Method1, std::function<void()> Method2){
-        //This function allows for specific interacting methods to be applied for a given cell in the monolayer
-        // You can choose which methods, and the UseMethod vector of booleans decides the type of interacting update to use for that cell
-        int N = UseMethod1.size();
-        long unsigned int nCellsTmp = Cells.size();
-        if(UseMethod1.size() > nCellsTmp){
-            std::cerr << "(!) Error: Index list is greater than the number of cells" << std::endl; 
-            return;
-        }
-        if(UseMethod1.size() < nCellsTmp){
-            std::cout << "(!) Warning: Index list is smaller than the number of cells" << std::endl;
-        }
-
-        for(int ci=1;ci<N;ci++){
-            cellidx = ci-1;
-            NCELLS = ci;
-            if(UseMethod1[ci]){
-                Method1();
-            }
-            else{
-                Method2();
-            }
-        }
-        cellidx = 0;
-        NCELLS = Cells.size();
     }
 
     void monolayer::ResetForces(){
@@ -311,9 +315,54 @@ namespace DPM{
         }
     }
 
+    void monolayer::InteractingForceUpdate(){
+        std::vector<std::thread> threads;
+        switch(InteractingMethodNum){
+            case 0:
+                for(int i=0;i<NCELLS;i++){
+                    threads.push_back(std::thread(&DPM::monolayer::RepulsiveForces,this,i));
+                }
+                for(auto& th : threads){
+                    th.join();
+                }
+                break;
+            case 1:
+                for(int i=0;i<NCELLS;i++){
+                    threads.push_back(std::thread(&DPM::monolayer::AttractiveForces,this,i));
+                }
+                for(auto& th : threads){
+                    th.join();
+                }
+                break;
+            case 2:
+                for(int i=0;i<NCELLS;i++){
+                    threads.push_back(std::thread(&DPM::monolayer::RetractingForceUpdate,this,i));
+                }
+                for(auto& th : threads){
+                    th.join();
+                }
+                break;
+            case 3:
+                for(int i=0;i<NCELLS;i++){
+                    threads.push_back(std::thread(&DPM::monolayer::PinnedForces,this,i));
+                }
+                for(auto& th : threads){
+                    th.join();
+                }
+                break;
+            default: 
+                std::cerr << "Error, Invalid interacting method" << std::endl;
+                exit(1);
+        }
+    }
+
     void monolayer::DrivingForceUpdate(){
+        std::vector<std::thread> threads;
         for(int ci=0;ci<NCELLS;ci++){
-            Cells[ci].DrivingForceUpdate();
+            threads.push_back(std::thread(&DPM::Cell::DrivingForceUpdate,&this->Cells[ci]));
+        }
+        for(auto& th : threads){
+            th.join();
         }
     }
 
@@ -383,7 +432,7 @@ namespace DPM{
         }
     }
 
-    void monolayer::VertexFIRE(std::function<void()> InteractingFunction, double alpha0, double dt, int itmax, double Ftol){
+    void monolayer::VertexFIRE(double alpha0, double dt, int itmax, double Ftol){
         //Minimize the forces based on an interacting function and the cell shape forces
         int ci,vi,i,NDELAY = 20;
         double P, fnorm, fcheck, vnorm, alpha, dtmax, dtmin;
@@ -486,14 +535,9 @@ namespace DPM{
                     Cells[ci].Y[vi] += dt*Cells[ci].vy[vi];
                 }
             }
-
-            for(ci=0;ci<NCELLS;ci++){
-                for(vi=0;vi<Cells[ci].NV;vi++){
-                    Cells[ci].UpdateShapeForces();
-                }
-            }
-
-            InteractingFunction();
+            ResetForces();
+            ShapeForceUpdate();
+            InteractingForceUpdate();
 
             for(ci=0;ci<NCELLS;ci++){
                 for(vi=0;vi<Cells[ci].NV;vi++){
@@ -532,18 +576,15 @@ namespace DPM{
             std::cout << "	 alpha = " << alpha << std::endl;
         }
     }
-    void monolayer::UpdateEuler(std::function<void()> InteractingFunction,int nsteps, double dt){
+    void monolayer::UpdateEuler(int nsteps, double dt){
         //Update for a given number of timesteps and protocol (Does not work for the mixed method)
         int ci, vi;
         for(int step=0;step<nsteps;step++){
             ResetForces();
-            //For all the cells update the forces based on intracellular shapes
-            for(ci=0;ci<NCELLS;ci++){
-                Cells[ci].UpdateShapeForces();
-                Cells[ci].DrivingForceUpdate();
-            }
+            ShapeForceUpdate();
+            DrivingForceUpdate();
             //now update the forces they have on eachother
-            InteractingFunction();
+            InteractingForceUpdate();
             //Use that force to change the position of the vertices
             for(ci=0;ci<NCELLS;ci++){
                 for(vi=0;vi<Cells[ci].NV;vi++){
@@ -570,7 +611,7 @@ namespace DPM{
         ResetForces();
     }
 
-    void monolayer::UpdateVV(std::function<void()> InteractingFunction,int nsteps, double dt){
+    void monolayer::UpdateVV(int nsteps, double dt){
        //Although avialable, I do not recomend using this method as cell motion is overdapmed and does not have a large inertial component
       std::vector<double> oldFx;
       std::vector<double> oldFy;
@@ -580,20 +621,21 @@ namespace DPM{
             oldFx.resize(Cells[ci].NV);
             oldFy.resize(Cells[ci].NV);
             for(vi=0;vi<Cells[ci].NV;vi++){
-            oldFx[vi] = Cells[ci].Fx[vi];
-            oldFy[vi] = Cells[ci].Fy[vi];
-            //Position update
-            Cells[ci].X[vi] += dt*Cells[ci].vx[vi] + 0.5*dt*dt*(Cells[ci].Fx[vi]);
-            Cells[ci].Y[vi] += dt*Cells[ci].vy[vi] + 0.5*dt*dt*(Cells[ci].Fy[vi]);
+                oldFx[vi] = Cells[ci].Fx[vi];
+                oldFy[vi] = Cells[ci].Fy[vi];
+                //Position update
+                Cells[ci].X[vi] += dt*Cells[ci].vx[vi] + 0.5*dt*dt*(Cells[ci].Fx[vi]);
+                Cells[ci].Y[vi] += dt*Cells[ci].vy[vi] + 0.5*dt*dt*(Cells[ci].Fy[vi]);
             }
-            Cells[ci].UpdateShapeForces();
             for(vi=0;vi<Cells[ci].NV;vi++){
-            //Velocity update
-            Cells[ci].vx[vi] += 0.5 * dt * (Cells[ci].Fx[vi]+oldFx[vi]);
-            Cells[ci].vy[vi] += 0.5 * dt * (Cells[ci].Fy[vi]+oldFy[vi]);
+                //Velocity update
+                Cells[ci].vx[vi] += 0.5 * dt * (Cells[ci].Fx[vi]+oldFx[vi]);
+                Cells[ci].vy[vi] += 0.5 * dt * (Cells[ci].Fy[vi]+oldFy[vi]);
             }
         }
-        InteractingFunction();
+        ResetForces();
+        ShapeForceUpdate();
+        InteractingForceUpdate();
       }
     }
 
@@ -616,14 +658,15 @@ namespace DPM{
         }
         return K;
     }
-    void monolayer::FindOverlaps(int ci, int cj){
+    std::vector<bool> monolayer::FindOverlaps(int ci, int cj){
         if(ci > (int)Cells.size() || cj > (int)Cells.size()){
             std::cout << "Error, cell index not found!" << std::endl;
-            return;
+            exit(1);
         }
         int NVi = Cells[ci].NV, NVj = Cells[cj].NV, vi, vj;
         int nNeg=0, nPos=0;
         double x,y,test;
+        std::vector<bool> overlaps;
         overlaps.resize(NVi);
         double X[NVj],Y[NVj];
         for(vj=0;vj<NVj;vj++){
@@ -669,6 +712,7 @@ namespace DPM{
                 overlaps[vi] = inside;
             }
         }
+        return overlaps;
     }
 
     //Biological Processes
