@@ -1,6 +1,7 @@
 #include <vector>
 #include <Cell.hpp>
 #include <functional>
+#include <string>
 namespace DPM{
     class monolayer{
         public:
@@ -17,20 +18,22 @@ namespace DPM{
             std::vector<DPM::Cell> Cells;
             std::vector<bool> overlaps;
             int cellidx = 0;
+            std::string InteractingMethod;
+            int InteractingMethodNum;
              //functions
             void disperse();
-            void VertexFIRE(std::function<void()> InteractingMethod, double alpha, double dt, int maxits, double Ftol);
-            void UpdateEuler(std::function<void()> InteractingMethod,int nsteps, double dt);
+            void VertexFIRE(double alpha, double dt, int maxits, double Ftol);
+            void UpdateEuler(int nsteps, double dt);
             void UpdateEuler(double dt);
-            void UpdateVV(std::function<void()> InteractingMethod, int nsteps, double dt);
+            void UpdateVV(int nsteps, double dt);
             double GetPackingFraction();
             double GetVertexKineticEnergy();
-            void FindOverlaps(int ci, int cj);
-            void RepulsiveForces();
-            void AttactiveForces();
-            void RetractingForceUpdate();
-            void PinnedForces();
-            void MixedInteractingMethods(std::vector<bool> firstMethod,std::function<void()> Method1, std::function<void()> Method2);
+            std::vector<bool> FindOverlaps(int ci, int cj);
+            void RepulsiveForces(int ci);
+            void AttractiveForces(int ci);
+            void RetractingForceUpdate(int ci);
+            void PinnedForces(int ci);
+            void InteractingForceUpdate();
             void ShapeForceUpdate();
             void ResetForces();
             void DrivingForceUpdate();
@@ -39,5 +42,6 @@ namespace DPM{
             void CellDivision(int cellidx);
             void NearestNeighborUpdate();
             void FindNearestNeighbor(int ci);
+            void SetInteractingMethod(std::string methodstring);
     };
 }
