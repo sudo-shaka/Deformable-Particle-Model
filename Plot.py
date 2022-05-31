@@ -5,7 +5,8 @@ import numpy as np
 def PlotDPM(monolayer):
     L = monolayer.BoxLength;
     #You may want to uncomment if using simulations with many cells
-    plt.figure(figsize=(6,6))
+    #plt.figure(figsize=(8,8))
+    plt.figure()
     for ci in range(monolayer.NCELLS):
         X = []; Y = [];
         for vi in range(len(monolayer.Cells[ci].X)):
@@ -22,7 +23,7 @@ def PlotDPM(monolayer):
             X.append(x)
             Y.append(y)
         F = [abs(monolayer.Cells[ci].Fx[i]) + abs(monolayer.Cells[ci].Fy[i]) \
-            for i in range(len(monolayer.Cells[ci].X))] 
+            for i in range(len(monolayer.Cells[ci].X))]
         plt.scatter(X,Y,c=F,cmap='coolwarm');
         #cx = np.mean(x)
         #cy = np.mean(y)

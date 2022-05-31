@@ -11,8 +11,7 @@ except:
 def Euler():
   #Initialize monolayer from parameter file (spheres)
   mono = DPMIO.ReadMonolayerFromParams('input.csv')
-  # Relax using FIRE minimization with respective force update method, alpha, dt, max iterations, and force tolerance
-  mono.VertexFIRE(mono.RepulsiveForceUpdate,0.2,0.001,1000,5e-3)
+  mono.SetInteractingMethod("Repulsive")
   #begining time steps
   dt = 0.001; nsteps = 100; nout = 50;
   for i in progressbar(range(nout)):
@@ -21,7 +20,7 @@ def Euler():
     plt.savefig('/tmp/'+str(i)+'.png')
     plt.close();
     #Overdamped Euler update with interacting force method, number of steps, and step size
-    mono.UpdateEuler(mono.RepulsiveForceUpdate,nsteps,dt);
+    mono.UpdateEuler(nsteps,dt);
 
   #this is to simply save the image
   with imageio.get_writer('/tmp/out.gif',mode='I') as writer:
